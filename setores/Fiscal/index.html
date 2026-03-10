@@ -1,1 +1,106 @@
-<!-- Dashboard de Fiscal (Em Breve) -->
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fiscal - San Paolo</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <link rel="stylesheet" href="../../css/styles.css">
+</head>
+
+<body>
+
+    <div id="main-app" style="display: block;">
+        <div id="sidebarOverlay" class="sidebar-overlay" onclick="window.toggleSidebar()"></div>
+        <aside class="sidebar" id="appSidebar">
+            <div class="brand">
+                <i class="ph-fill ph-chart-line-up"></i> San Paolo Fiscal
+            </div>
+            <div class="nav-menu">
+                <div class="nav-item active" onclick="window.switchView('dashboard')" id="nav-dashboard">
+                    <i class="ph ph-chart-pie-slice"></i> Dashboard
+                </div>
+                <div class="nav-item" onclick="window.switchView('tarefas')" id="nav-tarefas">
+                    <i class="ph ph-kanban"></i> Tarefas da Equipe
+                </div>
+                <div class="nav-item" onclick="window.switchView('metapwr')" id="nav-metapwr">
+                    <i class="ph ph-target"></i> Meta PWR
+                </div>
+            </div>
+            <div class="user-section">
+                <div style="margin-bottom: 10px; color: var(--text-muted);">Logado como: <strong id="loggedUserName"
+                        style="color: var(--text-main);">...</strong></div>
+                <div style="display: flex; gap: 10px; flex-direction: column;">
+                    <button class="btn btn-outline" style="width: 100%; justify-content: center;"
+                        onclick="window.toggleDarkMode()">
+                        <i class="ph ph-moon"></i> Tema Escuro
+                    </button>
+                    <button class="btn btn-outline" style="width: 100%; justify-content: center;"
+                        onclick="window.logout()">
+                        <i class="ph ph-sign-out"></i> Voltar / Sair
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div id="view-dashboard">
+                <div class="header-actions">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <button class="btn-menu-toggle" onclick="window.toggleSidebar()"><i
+                                class="ph ph-list"></i></button>
+                        <h1 class="page-title">Dashboard</h1>
+                    </div>
+                </div>
+                <div style="padding: 40px; text-align: center; margin-top: 50px;">
+                    <i class="ph ph-code" style="font-size: 4rem; color: var(--primary); margin-bottom: 20px;"></i>
+                    <h2>Ãrea em Desenvolvimento</h2>
+                    <p style="color: var(--text-muted); max-width: 500px; margin: 10px auto;">Os indicadores e grÃ¡ficos
+                        do Dashboard de Fiscal estarÃ£o disponÃ­veis em breve nesta seÃ§Ã£o.</p>
+                </div>
+            </div>
+
+            <div id="view-tarefas" style="display: none;">
+                <div class="header-actions">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <button class="btn-menu-toggle" onclick="window.toggleSidebar()"><i
+                                class="ph ph-list"></i></button>
+                        <h1 class="page-title">Tarefas da Equipe</h1>
+                    </div>
+                </div>
+                <div style="padding: 40px; text-align: center; margin-top: 50px;">
+                    <i class="ph ph-kanban" style="font-size: 4rem; color: var(--primary); margin-bottom: 20px;"></i>
+                    <h2>Ãrea em Desenvolvimento</h2>
+                    <p style="color: var(--text-muted); max-width: 500px; margin: 10px auto;">O quadro Kanban para
+                        acompanhamento de tarefas da equipe serÃ¡ implementado nesta seÃ§Ã£o.</p>
+                </div>
+            </div>
+
+            <div id="view-metapwr" style="display: none;">
+                <div class="header-actions">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <button class="btn-menu-toggle" onclick="window.toggleSidebar()"><i
+                                class="ph ph-list"></i></button>
+                        <h1 class="page-title">Meta PWR</h1>
+                    </div>
+                </div>
+                <div style="padding: 40px; text-align: center; margin-top: 50px;">
+                    <i class="ph ph-target" style="font-size: 4rem; color: var(--primary); margin-bottom: 20px;"></i>
+                    <h2>Ãrea em Desenvolvimento</h2>
+                    <p style="color: var(--text-muted); max-width: 500px; margin: 10px auto;">Acompanhamento das Metas
+                        PWR da Fiscal serÃ¡ liberado em breve.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+
+</html>
