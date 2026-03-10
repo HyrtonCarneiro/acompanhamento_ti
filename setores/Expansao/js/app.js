@@ -453,7 +453,9 @@ window.abrirModalCardExpansao = function (id = null) {
         if (document.getElementById('modalCardTituloInput')) document.getElementById('modalCardTituloInput').value = '';
         document.getElementById('modalCardLoja').value = '';
         document.getElementById('modalCardStatus').value = 'backlog';
-        document.querySelector('input[name="modalTagExp"][value="Estética"]').checked = true;
+        if (document.querySelector('input[name="modalTagExp"][value="Estética"]')) {
+            document.querySelector('input[name="modalTagExp"][value="Estética"]').checked = true;
+        }
         document.getElementById('modalDataInicio').value = '';
         document.getElementById('modalDataFim').value = '';
         document.getElementById('modalCustoPrev').value = '';
