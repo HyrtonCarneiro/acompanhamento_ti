@@ -1,5 +1,6 @@
 // setores/Expansao/js/app.js
 import { db, collection, getDocs, addDoc, updateDoc, doc, deleteDoc, onSnapshot, query, orderBy } from '../../../js/firebase.js';
+import { lojasIniciais } from '../../../js/data.js';
 
 let currentUser = sessionStorage.getItem('loggedUser') || null;
 let obrasCache = [];
@@ -68,10 +69,20 @@ function initApp() {
         window.switchView('dashboard');
         carregarKanbanExpansao();
         iniciarOuvintesTarefas();
+        popularSelectLojasExpansao();
     } catch (e) {
         console.error("ERRO CRÍTICO NO INITAPP:", e);
         showToast("Erro ao iniciar a tela. " + e.message, "error");
     }
+}
+
+function popularSelectLojasExpansao() {
+    const sel = document.getElementById('modalCardLoja');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">(Selecione a Loja)</option>';
+    lojasIniciais.sort((a, b) => a.nome.localeCompare(b.nome)).forEach(l => {
+        sel.innerHTML += `<option value="${l.nome}">${l.estado} - ${l.nome}</option>`;
+    });
 }
 
 window.switchView = function (view) {
@@ -439,7 +450,7 @@ window.abrirModalCardExpansao = function (id = null) {
 
         // Limpar modal
         document.getElementById('modalCardId').value = '';
-        document.getElementById('modalCardTitulo').innerText = 'Nova Obra/Manutenção';
+        if (document.getElementById('modalCardTituloInput')) document.getElementById('modalCardTituloInput').value = '';
         document.getElementById('modalCardLoja').value = '';
         document.getElementById('modalCardStatus').value = 'backlog';
         document.querySelector('input[name="modalTagExp"][value="Estética"]').checked = true;
@@ -461,7 +472,7 @@ window.abrirModalCardExpansao = function (id = null) {
             const obra = obrasCache.find(o => o.id === id);
             if (obra) {
                 document.getElementById('modalCardId').value = obra.id;
-                document.getElementById('modalCardTitulo').innerText = obra.titulo;
+                if (document.getElementById('modalCardTituloInput')) document.getElementById('modalCardTituloInput').value = obra.titulo;
                 document.getElementById('modalCardLoja').value = obra.loja;
                 document.getElementById('modalCardStatus').value = obra.status;
 
@@ -483,13 +494,6 @@ window.abrirModalCardExpansao = function (id = null) {
 
                 document.getElementById('btnExcluirCardExpansao').style.display = 'inline-block';
             }
-        } else {
-            setTimeout(() => {
-                const novoTitulo = prompt("Digite o Título da nova Obra/Manutenção:");
-                if (novoTitulo) {
-                    document.getElementById('modalCardTitulo').innerText = novoTitulo;
-                }
-            }, 100);
         }
 
         modal.classList.add('active');
@@ -505,7 +509,8 @@ window.fecharModalCardExpansao = function () {
 window.salvarCardExpansao = async function () {
     try {
         const id = document.getElementById('modalCardId').value;
-        const titulo = document.getElementById('modalCardTitulo').innerText;
+        const tituloEl = document.getElementById('modalCardTituloInput');
+        const titulo = tituloEl ? tituloEl.value.trim() : '';
         const loja = document.getElementById('modalCardLoja').value;
         const status = document.getElementById('modalCardStatus').value;
         const radioSelected = document.querySelector('input[name="modalTagExp"]:checked');

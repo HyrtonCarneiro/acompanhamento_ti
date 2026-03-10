@@ -262,150 +262,155 @@
     <div id="modalCardExpansaoObj" class="modal-overlay">
         <div class="modal-content" style="max-width: 800px; width: 95%;">
             <div class="modal-header" style="flex-direction: column; align-items: flex-start;">
-                <div style="display: flex; width: 100%; justify-content: space-between; align-items: center;">
-                    <h2 id="modalCardExpansaoTitulo">Nova Obra / Job</h2>
+                <div style="display: flex; align-items: center; width: 100%;">
+                    <input type="text" id="modalCardTituloInput"
+                        placeholder="Digite o Título do Projeto (Ex: Retrofit Iguatemi)"
+                        style="flex: 1; border: none; font-size: 1.5rem; font-weight: bold; background: transparent; color: var(--text-main); outline: none; border-bottom: 2px dashed var(--border); padding: 5px 0; margin-right: 15px;">
                     <button class="btn btn-outline" style="padding: 8px;" onclick="window.fecharModalCardExpansao()"><i
                             class="ph ph-x"></i></button>
                 </div>
-                <div style="display: flex; gap: 10px; margin-top: 15px; width: 100%;">
-                    <div style="flex: 1;">
-                        <label style="font-size: 0.8rem; color: var(--text-muted); font-weight:600;">Região / Unidade de
-                            Loja</label>
-                        <input type="text" id="modalCardLoja" placeholder="Ex: Loja Iguatemi"
-                            style="width: 100%; border: 1px solid var(--border); padding: 8px; border-radius: 6px; background: var(--bg-color); color: var(--text-main);">
-                    </div>
-                    <div style="width: 200px;">
-                        <label style="font-size: 0.8rem; color: var(--text-muted); font-weight:600;">Status da
-                            Obra</label>
-                        <select id="modalCardStatus"
-                            style="width: 100%; border: 1px solid var(--border); padding: 8px; border-radius: 6px; background: var(--bg-color); color: var(--text-main);">
-                            <option value="backlog">Backlog / Triagem</option>
-                            <option value="planejamento">Pré-Obra / Orçamento</option>
-                            <option value="fase1">Fase 1 (Demolição/Escr.)</option>
-                            <option value="fase2">Fase 2 (Instalações)</option>
-                            <option value="fase3">Fase 3 (Revest. Final)</option>
-                            <option value="concluido">Entregue (Concluído)</option>
-                        </select>
-                    </div>
-                </div>
             </div>
-
-            <div style="padding: 5px 0 20px 0;">
-                <input type="hidden" id="modalCardId">
-
-                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: start;">
-                    <!-- Coluna Esquerda: Descrição, Checklists -->
-                    <div>
-                        <h4 style="margin: 0 0 10px 0; color: var(--primary);">Tag Prioritária:</h4>
-                        <div class="tags-container" style="margin-bottom: 20px;">
-                            <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;"><input
-                                    type="radio" name="modalTagExp" value="Urgente"> <span
-                                    class="tag tag-urgente">Urgente</span></label>
-                            <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;"><input
-                                    type="radio" name="modalTagExp" value="Expansão"> <span
-                                    class="tag tag-expansao">Expansão</span></label>
-                            <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;"><input
-                                    type="radio" name="modalTagExp" value="Preventiva"> <span
-                                    class="tag tag-preventiva">Preventiva</span></label>
-                            <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;"><input
-                                    type="radio" name="modalTagExp" value="Estética" checked> <span
-                                    class="tag tag-estetica">Estética</span></label>
-                        </div>
-
-                        <h4 style="margin: 0 0 10px 0; color: var(--primary);"><i class="ph ph-check-square-offset"></i>
-                            Progresso e Checklists</h4>
-                        <div class="progress-container" style="margin-bottom: 15px; height: 10px;">
-                            <div class="progress-bar" id="modalChecklistProgress" style="width: 0%;"></div>
-                        </div>
-                        <div id="modalChecklistItensContainer" style="margin-bottom: 15px;"></div>
-
-                        <div style="display: flex; gap: 10px; margin-bottom: 30px;">
-                            <input type="text" id="novoChecklistItemInput" placeholder="Adicionar verificação..."
-                                style="padding: 6px 10px; flex: 1; border: 1px solid var(--border); border-radius: 4px; background: var(--bg-color); color: var(--text-main);">
-                            <button class="btn btn-outline" onclick="window.addChecklistItemCard()"><i
-                                    class="ph ph-plus"></i></button>
-                        </div>
-
-                        <h4 style="margin: 0 0 10px 0; color: var(--primary);"><i class="ph ph-chat-text"></i> Diário da
-                            Obra</h4>
-                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                            <textarea id="novoComentarioCard" rows="2" placeholder="Descreva os progressos..."
-                                style="flex:1; border: 1px solid var(--border); background: var(--bg-color); color: var(--text-main); border-radius: 6px; padding: 8px;"></textarea>
-                            <button class="btn btn-primary" onclick="window.addComentarioCardExpansao()"><i
-                                    class="ph ph-paper-plane-right"></i></button>
-                        </div>
-                        <div id="modalComentariosContainer"
-                            style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 5px;">
-                        </div>
-                    </div>
-
-                    <!-- Coluna Direita: Cronograma, Orçamento e Anexos -->
-                    <div>
-                        <div
-                            style="background: var(--bg-color); padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 20px;">
-                            <h4 style="margin: 0 0 10px 0; color: var(--primary);"><i class="ph ph-calendar"></i> Datas
-                                Chave</h4>
-                            <div style="margin-bottom: 10px;">
-                                <label
-                                    style="font-size: 0.75rem; color: var(--text-muted); display:block; margin-bottom:4px;">Início
-                                    da Obra</label>
-                                <input type="date" id="modalDataInicio"
-                                    style="padding: 6px; width: 100%; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); color: var(--text-main);">
-                            </div>
-                            <div>
-                                <label
-                                    style="font-size: 0.75rem; color: var(--text-muted); display:block; margin-bottom:4px;">Previsão
-                                    de Entrega</label>
-                                <input type="date" id="modalDataFim"
-                                    style="padding: 6px; width: 100%; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); color: var(--text-main);">
-                            </div>
-                        </div>
-
-                        <div
-                            style="background: var(--bg-color); padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 20px;">
-                            <h4 style="margin: 0 0 10px 0; color: var(--primary);"><i class="ph ph-currency-dollar"></i>
-                                Financeiro</h4>
-                            <div style="margin-bottom: 10px;">
-                                <label
-                                    style="font-size: 0.75rem; color: var(--text-muted); display:block; margin-bottom:4px;">Custo
-                                    Previsto (R$)</label>
-                                <input type="number" id="modalCustoPrev" placeholder="Ex: 15000"
-                                    style="padding: 6px; width: 100%; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); color: var(--text-main);">
-                            </div>
-                            <div>
-                                <label
-                                    style="font-size: 0.75rem; color: var(--text-muted); display:block; margin-bottom:4px;">Custo
-                                    Final Executado</label>
-                                <input type="number" id="modalCustoReal" placeholder="Ex: 14500"
-                                    style="padding: 6px; width: 100%; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); color: var(--text-main);">
-                            </div>
-                        </div>
-
-                        <div
-                            style="background: var(--bg-color); padding: 15px; border-radius: 8px; border: 1px solid var(--border);">
-                            <h4 style="margin: 0 0 10px 0; color: var(--primary);"><i class="ph ph-paperclip"></i>
-                                Anexos & Fotos URL</h4>
-                            <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-                                <input type="text" id="modalNovoAnexoURL" placeholder="http://link-foto..."
-                                    style="padding: 6px; flex: 1; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); color: var(--text-main);">
-                                <button class="btn btn-outline" style="padding: 6px;" onclick="window.addAnexoCard()"><i
-                                        class="ph ph-plus"></i></button>
-                            </div>
-                            <ul id="modalAnexosContainer"
-                                style="padding-left: 15px; margin:0; font-size: 0.8rem; color: var(--accent);"></ul>
-                        </div>
-                    </div>
+            <div style="display: flex; gap: 10px; margin-top: 15px; width: 100%;">
+                <div style="flex: 1;">
+                    <label style="font-size: 0.8rem; color: var(--text-muted); font-weight:600;">Região / Unidade de
+                        Loja</label>
+                    <select id="modalCardLoja"
+                        style="width: 100%; border: 1px solid var(--border); padding: 8px; border-radius: 6px; background: var(--bg-color); color: var(--text-main);">
+                        <!-- Options injetados via JS -->
+                    </select>
                 </div>
-
-                <div
-                    style="margin-top: 25px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 20px;">
-                    <button class="btn btn-danger" id="btnExcluirCardExpansao" style="display: none;"
-                        onclick="window.excluirObra()"><i class="ph ph-trash"></i> Excluir Job</button>
-                    <button class="btn btn-primary" onclick="window.salvarCardExpansao()" style="margin-left: auto;"><i
-                            class="ph ph-floppy-disk"></i> Salvar Workflow</button>
+                <div style="width: 200px;">
+                    <label style="font-size: 0.8rem; color: var(--text-muted); font-weight:600;">Status da
+                        Obra</label>
+                    <select id="modalCardStatus"
+                        style="width: 100%; border: 1px solid var(--border); padding: 8px; border-radius: 6px; background: var(--bg-color); color: var(--text-main);">
+                        <option value="backlog">Backlog / Triagem</option>
+                        <option value="planejamento">Pré-Obra / Orçamento</option>
+                        <option value="fase1">Fase 1 (Demolição/Escr.)</option>
+                        <option value="fase2">Fase 2 (Instalações)</option>
+                        <option value="fase3">Fase 3 (Revest. Final)</option>
+                        <option value="concluido">Entregue (Concluído)</option>
+                    </select>
                 </div>
             </div>
         </div>
+
+        <div style="padding: 5px 0 20px 0;">
+            <input type="hidden" id="modalCardId">
+
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: start;">
+                <!-- Coluna Esquerda: Descrição, Checklists -->
+                <div>
+                    <h4 style="margin: 0 0 10px 0; color: var(--primary);">Tag Prioritária:</h4>
+                    <div class="tags-container" style="margin-bottom: 20px;">
+                        <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;"><input
+                                type="radio" name="modalTagExp" value="Urgente"> <span
+                                class="tag tag-urgente">Urgente</span></label>
+                        <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;"><input
+                                type="radio" name="modalTagExp" value="Expansão"> <span
+                                class="tag tag-expansao">Expansão</span></label>
+                        <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;"><input
+                                type="radio" name="modalTagExp" value="Preventiva"> <span
+                                class="tag tag-preventiva">Preventiva</span></label>
+                        <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;"><input
+                                type="radio" name="modalTagExp" value="Estética" checked> <span
+                                class="tag tag-estetica">Estética</span></label>
+                    </div>
+
+                    <h4 style="margin: 0 0 10px 0; color: var(--primary);"><i class="ph ph-check-square-offset"></i>
+                        Progresso e Checklists</h4>
+                    <div class="progress-container" style="margin-bottom: 15px; height: 10px;">
+                        <div class="progress-bar" id="modalChecklistProgress" style="width: 0%;"></div>
+                    </div>
+                    <div id="modalChecklistItensContainer" style="margin-bottom: 15px;"></div>
+
+                    <div style="display: flex; gap: 10px; margin-bottom: 30px;">
+                        <input type="text" id="novoChecklistItemInput" placeholder="Adicionar verificação..."
+                            style="padding: 6px 10px; flex: 1; border: 1px solid var(--border); border-radius: 4px; background: var(--bg-color); color: var(--text-main);">
+                        <button class="btn btn-outline" onclick="window.addChecklistItemCard()"><i
+                                class="ph ph-plus"></i></button>
+                    </div>
+
+                    <h4 style="margin: 0 0 10px 0; color: var(--primary);"><i class="ph ph-chat-text"></i> Diário da
+                        Obra</h4>
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <textarea id="novoComentarioCard" rows="2" placeholder="Descreva os progressos..."
+                            style="flex:1; border: 1px solid var(--border); background: var(--bg-color); color: var(--text-main); border-radius: 6px; padding: 8px;"></textarea>
+                        <button class="btn btn-primary" onclick="window.addComentarioCardExpansao()"><i
+                                class="ph ph-paper-plane-right"></i></button>
+                    </div>
+                    <div id="modalComentariosContainer"
+                        style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 5px;">
+                    </div>
+                </div>
+
+                <!-- Coluna Direita: Cronograma, Orçamento e Anexos -->
+                <div>
+                    <div
+                        style="background: var(--bg-color); padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 20px;">
+                        <h4 style="margin: 0 0 10px 0; color: var(--primary);"><i class="ph ph-calendar"></i> Datas
+                            Chave</h4>
+                        <div style="margin-bottom: 10px;">
+                            <label
+                                style="font-size: 0.75rem; color: var(--text-muted); display:block; margin-bottom:4px;">Início
+                                da Obra</label>
+                            <input type="date" id="modalDataInicio"
+                                style="padding: 6px; width: 100%; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); color: var(--text-main);">
+                        </div>
+                        <div>
+                            <label
+                                style="font-size: 0.75rem; color: var(--text-muted); display:block; margin-bottom:4px;">Previsão
+                                de Entrega</label>
+                            <input type="date" id="modalDataFim"
+                                style="padding: 6px; width: 100%; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); color: var(--text-main);">
+                        </div>
+                    </div>
+
+                    <div
+                        style="background: var(--bg-color); padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 20px;">
+                        <h4 style="margin: 0 0 10px 0; color: var(--primary);"><i class="ph ph-currency-dollar"></i>
+                            Financeiro</h4>
+                        <div style="margin-bottom: 10px;">
+                            <label
+                                style="font-size: 0.75rem; color: var(--text-muted); display:block; margin-bottom:4px;">Custo
+                                Previsto (R$)</label>
+                            <input type="number" id="modalCustoPrev" placeholder="Ex: 15000"
+                                style="padding: 6px; width: 100%; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); color: var(--text-main);">
+                        </div>
+                        <div>
+                            <label
+                                style="font-size: 0.75rem; color: var(--text-muted); display:block; margin-bottom:4px;">Custo
+                                Final Executado</label>
+                            <input type="number" id="modalCustoReal" placeholder="Ex: 14500"
+                                style="padding: 6px; width: 100%; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); color: var(--text-main);">
+                        </div>
+                    </div>
+
+                    <div
+                        style="background: var(--bg-color); padding: 15px; border-radius: 8px; border: 1px solid var(--border);">
+                        <h4 style="margin: 0 0 10px 0; color: var(--primary);"><i class="ph ph-paperclip"></i>
+                            Anexos & Fotos URL</h4>
+                        <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                            <input type="text" id="modalNovoAnexoURL" placeholder="http://link-foto..."
+                                style="padding: 6px; flex: 1; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); color: var(--text-main);">
+                            <button class="btn btn-outline" style="padding: 6px;" onclick="window.addAnexoCard()"><i
+                                    class="ph ph-plus"></i></button>
+                        </div>
+                        <ul id="modalAnexosContainer"
+                            style="padding-left: 15px; margin:0; font-size: 0.8rem; color: var(--accent);"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <div
+                style="margin-top: 25px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 20px;">
+                <button class="btn btn-danger" id="btnExcluirCardExpansao" style="display: none;"
+                    onclick="window.excluirObra()"><i class="ph ph-trash"></i> Excluir Job</button>
+                <button class="btn btn-primary" onclick="window.salvarCardExpansao()" style="margin-left: auto;"><i
+                        class="ph ph-floppy-disk"></i> Salvar Workflow</button>
+            </div>
+        </div>
+    </div>
     </div>
 
     <!-- MODAL EQUIPE EXPANSÃO -->
