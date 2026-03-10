@@ -26,6 +26,19 @@ function initApp() {
     }
 
     document.getElementById('loggedUserName').innerText = currentUser;
+
+    // Injetar botão do Hub dinamicamente
+    document.querySelectorAll('.header-actions > div:first-child').forEach(container => {
+        if (container.querySelector('.btn-hub')) return;
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-outline btn-hub';
+        btn.style.padding = '6px 10px';
+        btn.title = 'Escolha de Setores';
+        btn.innerHTML = '<i class="ph ph-squares-four" style="font-size: 1.2rem;"></i>';
+        btn.onclick = () => window.location.href = '../../index.html?hub=1';
+        container.insertBefore(btn, container.querySelector('.page-title'));
+    });
+
     window.switchView('dashboard');
 }
 
@@ -94,11 +107,11 @@ function renderizarGrafico() {
                 data: lojasData,
                 backgroundColor: function (context) {
                     const val = context.raw;
-                    if (!val) return '#3b82f6';
+                    if (!val) return '#265D7C'; // Ao leite default
                     // Cores baseadas no percentual do CMV (Ideal abaixo de 30%)
-                    if (val.y > 30) return '#ef4444'; // Vermelho
-                    if (val.y >= 26 && val.y <= 30) return '#f59e0b'; // Amarelo
-                    return '#10b981'; // Verde
+                    if (val.y > 30) return '#DA0D17'; // Red Velvet 
+                    if (val.y >= 26 && val.y <= 30) return '#DA5513'; // Laranja San Paolo
+                    return '#4F7039'; // Pistache
                 },
                 pointRadius: 8,
                 pointHoverRadius: 10

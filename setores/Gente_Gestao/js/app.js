@@ -35,6 +35,19 @@ function initApp() {
     // Para simplificar no protótipo, se for usuário normal a gente deixa olhar o layout básico se ele tentar via URL (ideal é validar a role correspondente ao folder de origin)
 
     document.getElementById('loggedUserName').innerText = currentUser;
+
+    // Injetar botão do Hub dinamicamente
+    document.querySelectorAll('.header-actions > div:first-child').forEach(container => {
+        if (container.querySelector('.btn-hub')) return;
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-outline btn-hub';
+        btn.style.padding = '6px 10px';
+        btn.title = 'Escolha de Setores';
+        btn.innerHTML = '<i class="ph ph-squares-four" style="font-size: 1.2rem;"></i>';
+        btn.onclick = () => window.location.href = '../../index.html?hub=1';
+        container.insertBefore(btn, container.querySelector('.page-title'));
+    });
+
     window.switchView('dashboard');
 }
 

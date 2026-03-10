@@ -78,7 +78,10 @@ function initApp() {
         sectors = ["TI"];
     }
 
-    if (sectors.length === 1 && sectors[0] !== 'Admin') {
+    const urlParams = new URLSearchParams(window.location.search);
+    const forceHub = urlParams.get('hub') === '1';
+
+    if (sectors.length === 1 && sectors[0] !== 'Admin' && !forceHub) {
         window.location.href = `./setores/${sectors[0]}/index.html`;
         return;
     }

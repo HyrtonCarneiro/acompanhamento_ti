@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,112 +10,279 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
     <link rel="stylesheet" href="../../css/styles.css">
 </head>
+
 <body>
 
-<div id="main-app" style="display: block;">
-    <div id="sidebarOverlay" class="sidebar-overlay" onclick="window.toggleSidebar()"></div>
-    <aside class="sidebar" id="appSidebar">
-        <div class="brand">
-            <i class="ph-fill ph-hard-drives"></i> San Paolo TI
-        </div>
-        <div class="nav-menu">
-            <div class="nav-item active" onclick="window.switchView('analytics')" id="nav-analytics">
-                <i class="ph ph-chart-pie-slice"></i> Dashboard
+    <div id="main-app" style="display: block;">
+        <div id="sidebarOverlay" class="sidebar-overlay" onclick="window.toggleSidebar()"></div>
+        <aside class="sidebar" id="appSidebar">
+            <div class="brand">
+                <i class="ph-fill ph-hard-drives"></i> San Paolo TI
             </div>
-            <div class="nav-item" onclick="window.switchView('lojas')" id="nav-lojas">
-                <i class="ph ph-storefront"></i> Lojas e Chamados
-            </div>
-            <div class="nav-item" onclick="window.switchView('projetos')" id="nav-projetos">
-                <i class="ph ph-kanban"></i> Tarefas da Equipe
-            </div>
-            <div class="nav-item" onclick="window.switchView('atas')" id="nav-atas">
-                <i class="ph ph-file-text"></i> Ata de Reunião
-            </div>
-            <div class="nav-item" onclick="window.switchView('bi')" id="nav-bi">
-                <i class="ph ph-presentation-chart"></i> Power BI da TI
-            </div>
-        </div>
-        <div class="user-section">
-            <div style="margin-bottom: 10px; color: var(--text-muted);">Logado como: <strong id="loggedUserName" style="color: var(--text-main);">...</strong></div>
-            <div style="display: flex; gap: 10px; flex-direction: column;">
-                <button class="btn btn-outline" style="width: 100%; justify-content: center;" onclick="window.toggleDarkMode()">
-                    <i class="ph ph-moon"></i> Tema Escuro
-                </button>
-                <button class="btn btn-outline" style="width: 100%; justify-content: center;" onclick="window.logout()">
-                    <i class="ph ph-sign-out"></i> Sair
-                </button>
-            </div>
-        </div>
-    </aside>
-
-    <main class="main-content">
-        <div id="view-analytics">
-            <div class="header-actions">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <button class="btn-menu-toggle" onclick="window.toggleSidebar()"><i class="ph ph-list"></i></button>
-                    <h1 class="page-title">Visão Geral</h1>
+            <div class="nav-menu">
+                <div class="nav-item active" onclick="window.switchView('analytics')" id="nav-analytics">
+                    <i class="ph ph-chart-pie-slice"></i> Dashboard
                 </div>
-                <button class="btn btn-primary" onclick="window.switchView('lojas')">
-                    <i class="ph ph-plus"></i> Novo Chamado
-                </button>
+                <div class="nav-item" onclick="window.switchView('lojas')" id="nav-lojas">
+                    <i class="ph ph-storefront"></i> Lojas e Chamados
+                </div>
+                <div class="nav-item" onclick="window.switchView('projetos')" id="nav-projetos">
+                    <i class="ph ph-kanban"></i> Tarefas da Equipe
+                </div>
+                <div class="nav-item" onclick="window.switchView('atas')" id="nav-atas">
+                    <i class="ph ph-file-text"></i> Ata de Reunião
+                </div>
+                <div class="nav-item" onclick="window.switchView('metapwr')" id="nav-metapwr">
+                    <i class="ph ph-target"></i> Meta PWR
+                </div>
+                <div class="nav-item" onclick="window.switchView('bi')" id="nav-bi">
+                    <i class="ph ph-presentation-chart"></i> Power BI da TI
+                </div>
             </div>
-            <div class="analytics-grid">
-                <div class="stat-card">
-                    <div class="stat-icon blue"><i class="ph ph-buildings"></i></div>
-                    <div>
-                        <p class="stat-value" id="statTotalLojas">0</p>
-                        <p class="stat-label">Lojas Monitoradas</p>
+            <div class="user-section">
+                <div style="margin-bottom: 10px; color: var(--text-muted);">Logado como: <strong id="loggedUserName"
+                        style="color: var(--text-main);">...</strong></div>
+                <div style="display: flex; gap: 10px; flex-direction: column;">
+                    <button class="btn btn-outline" style="width: 100%; justify-content: center;"
+                        onclick="window.toggleDarkMode()">
+                        <i class="ph ph-moon"></i> Tema Escuro
+                    </button>
+                    <button class="btn btn-outline" style="width: 100%; justify-content: center;"
+                        onclick="window.logout()">
+                        <i class="ph ph-sign-out"></i> Sair
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div id="view-analytics">
+                <div class="header-actions">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <button class="btn-menu-toggle" onclick="window.toggleSidebar()"><i
+                                class="ph ph-list"></i></button>
+                        <h1 class="page-title">Visão Geral</h1>
+                    </div>
+                    <button class="btn btn-primary" onclick="window.switchView('lojas')">
+                        <i class="ph ph-plus"></i> Novo Chamado
+                    </button>
+                </div>
+                <div class="analytics-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon blue"><i class="ph ph-buildings"></i></div>
+                        <div>
+                            <p class="stat-value" id="statTotalLojas">0</p>
+                            <p class="stat-label">Lojas Monitoradas</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon red"><i class="ph ph-warning-circle"></i></div>
+                        <div>
+                            <p class="stat-value" id="statPendentes">0</p>
+                            <p class="stat-label">Ocorrências Pendentes</p>
+                        </div>
                     </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon red"><i class="ph ph-warning-circle"></i></div>
-                    <div>
-                        <p class="stat-value" id="statPendentes">0</p>
-                        <p class="stat-label">Ocorrências Pendentes</p>
+                <div class="analytics-grid">
+                    <div class="chart-container">
+                        <canvas id="chartStatus"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chartRegionais"></canvas>
                     </div>
                 </div>
             </div>
-            <div class="analytics-grid">
-                <div class="chart-container">
-                    <canvas id="chartStatus"></canvas>
-                </div>
-                <div class="chart-container">
-                    <canvas id="chartRegionais"></canvas>
-                </div>
-            </div>
-        </div>
 
-        <div id="view-lojas" style="display: none;">
-            <div class="header-actions">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <button class="btn-menu-toggle" onclick="window.toggleSidebar()"><i class="ph ph-list"></i></button>
-                    <h1 class="page-title">Monitoramento de Lojas</h1>
+            <div id="view-lojas" style="display: none;">
+                <div class="header-actions">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <button class="btn-menu-toggle" onclick="window.toggleSidebar()"><i
+                                class="ph ph-list"></i></button>
+                        <h1 class="page-title">Monitoramento de Lojas</h1>
+                    </div>
+                    <button class="btn btn-outline" onclick="window.exportarCSV()">
+                        <i class="ph ph-download-simple"></i> Exportar Relatório
+                    </button>
                 </div>
-                <button class="btn btn-outline" onclick="window.exportarCSV()">
-                    <i class="ph ph-download-simple"></i> Exportar Relatório
-                </button>
+
+                <div class="toolbar">
+                    <div class="search-wrapper">
+                        <i class="ph ph-magnifying-glass"></i>
+                        <input type="text" id="searchInput" placeholder="Buscar por loja ou estado..."
+                            oninput="window.renderizarLojas()">
+                    </div>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <select id="statusFilter" onchange="window.renderizarLojas()">
+                            <option value="todos">Todos os Status</option>
+                            <option value="pendente">Apenas Pendentes</option>
+                            <option value="resolvido">Apenas Resolvidos</option>
+                        </select>
+                        <select id="tagFilter" onchange="window.renderizarLojas()">
+                            <option value="todas">Todas as Tags</option>
+                            <option value="Hardware">Hardware</option>
+                            <option value="Software">Software</option>
+                            <option value="Degust">Degust</option>
+                            <option value="Athenas">Athenas</option>
+                            <option value="3S">3S</option>
+                            <option value="POS">POS</option>
+                        </select>
+                        <select id="setorFilter" onchange="window.renderizarLojas()">
+                            <option value="todos">Todos os Setores</option>
+                            <option value="Financeiro">Financeiro</option>
+                            <option value="Fiscal">Fiscal</option>
+                            <option value="Auditoria">Auditoria</option>
+                            <option value="TI">TI</option>
+                            <option value="Controladoria">Controladoria</option>
+                            <option value="Gente e Gestão">Gente e Gestão</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="Operação">Operação</option>
+                            <option value="CD">CD</option>
+                        </select>
+                        <select id="sortOrder" onchange="window.renderizarLojas()">
+                            <option value="pendentes-topo">Prioridade (Pendentes p/ Topo)</option>
+                            <option value="recentes">Atualizações Recentes</option>
+                            <option value="loja-az">Lojas (A-Z)</option>
+                            <option value="estado-az">Regional (A-Z)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="lojas-container"></div>
             </div>
-            
-            <div class="toolbar">
-                <div class="search-wrapper">
-                    <i class="ph ph-magnifying-glass"></i>
-                    <input type="text" id="searchInput" placeholder="Buscar por loja ou estado..." oninput="window.renderizarLojas()">
+
+            <div id="view-projetos" style="display: none;">
+
+                <div class="header-actions" style="margin-bottom: 24px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <button class="btn-menu-toggle" onclick="window.toggleSidebar()"><i
+                                class="ph ph-list"></i></button>
+                        <h1 class="page-title">Tarefas e Projetos</h1>
+                    </div>
+                    <button class="btn btn-outline" onclick="window.exportarProjetosCSV()">
+                        <i class="ph ph-download-simple"></i> Exportar Relatório
+                    </button>
                 </div>
-                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <select id="statusFilter" onchange="window.renderizarLojas()">
-                        <option value="todos">Todos os Status</option>
-                        <option value="pendente">Apenas Pendentes</option>
-                        <option value="resolvido">Apenas Resolvidos</option>
-                    </select>
-                    <select id="tagFilter" onchange="window.renderizarLojas()">
-                        <option value="todas">Todas as Tags</option>
+
+                <div id="membrosEquipeContainer"
+                    style="display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap;">
+                    <!-- Carregado via JS -->
+                </div>
+                <div class="chart-container" style="margin-bottom: 24px;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h3 style="margin-top: 0; margin-bottom: 0;">Registrar Nova Demanda</h3>
+                        <button class="btn btn-outline" style="font-size: 0.8rem;" onclick="window.abrirModalEquipe()">
+                            <i class="ph ph-users"></i> Equipe
+                        </button>
+                    </div>
+                    <input type="text" id="projDesc" placeholder="Descrição da tarefa ou projeto"
+                        style="margin-bottom: 12px;">
+                    <div style="display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+                        <input type="text" id="projDemand" placeholder="Demandante" style="flex: 2; min-width: 150px;">
+                        <input type="date" id="projDate" style="flex: 1; min-width: 120px;">
+                        <select id="projStatus" style="flex: 1; min-width: 120px;">
+                            <option value="Pendente">Pendente</option>
+                            <option value="Em Andamento">Em Andamento</option>
+                            <option value="Concluído">Concluído</option>
+                        </select>
+                    </div>
+                    <!-- Link para a tarefa -->
+                    <input type="url" id="projAnexo" placeholder="Link para visualização/anexo (Opcional)"
+                        style="margin-bottom: 12px; width: 100%;">
+
+                    <button class="btn btn-primary" onclick="window.salvarProjeto()">
+                        <i class="ph ph-floppy-disk"></i> Salvar Registro
+                    </button>
+                </div>
+
+                <div class="kanban-board" id="projetos-list">
+                    <!-- Kanban JS -->
+                </div>
+            </div>
+
+            <div id="view-atas" style="display: none;">
+                <div class="header-actions">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <button class="btn-menu-toggle" onclick="window.toggleSidebar()"><i
+                                class="ph ph-list"></i></button>
+                        <h1 class="page-title">Ata de Reuniões Semanais</h1>
+                    </div>
+                </div>
+                <div class="chart-container" style="margin-bottom: 24px;">
+                    <h3 style="margin-top: 0; margin-bottom: 12px;"><i class="ph ph-file-text"></i> Nova Ata Documentada
+                    </h3>
+                    <input type="text" id="ataTitulo" placeholder="Título / Assunto Principal"
+                        style="width: 100%; margin-bottom: 10px; font-weight: bold;">
+                    <textarea id="ataTexto" rows="5" placeholder="Descreva os tópicos abordados nesta reunião..."
+                        style="width: 100%; margin-bottom: 15px;"></textarea>
+                    <button class="btn btn-primary" onclick="window.salvarAta()">
+                        <i class="ph ph-floppy-disk"></i> Registrar Ata
+                    </button>
+                </div>
+                <div id="listaAtasContainer">
+                    <!-- Populado JS -->
+                </div>
+            </div>
+
+            <div id="view-metapwr" style="display: none;">
+                <div class="header-actions">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <button class="btn-menu-toggle" onclick="window.toggleSidebar()"><i
+                                class="ph ph-list"></i></button>
+                        <h1 class="page-title">Meta PWR</h1>
+                    </div>
+                </div>
+                <div style="padding: 40px; text-align: center; margin-top: 50px;">
+                    <i class="ph ph-target" style="font-size: 4rem; color: var(--primary); margin-bottom: 20px;"></i>
+                    <h2>Área em Desenvolvimento</h2>
+                    <p style="color: var(--text-muted); max-width: 500px; margin: 10px auto;">Acompanhamento das Metas
+                        PWR da Tecnologia (TI) será liberado em breve.</p>
+                </div>
+            </div>
+
+            <div id="view-bi" style="display: none; height: 100%;">
+                <div class="header-actions">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <button class="btn-menu-toggle" onclick="window.toggleSidebar()"><i
+                                class="ph ph-list"></i></button>
+                        <h1 class="page-title">Power BI da TI</h1>
+                    </div>
+                </div>
+                <div
+                    style="width: 100%; height: calc(100vh - 120px); border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    <iframe title="Power BI da TI" width="100%" height="100%"
+                        src="https://app.powerbi.com/view?r=eyJrIjoiY2NkNzdmYmQtMWMwNS00NzU0LWFmMGMtNWViM2Q3NzBkZWRjIiwidCI6IjE3ZmUxNDY1LWZlNjEtNGVmMy1hYThlLWZhOWU5YzY1MGJiOSJ9"
+                        frameborder="0" allowFullScreen="true" style="border: none;"></iframe>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <div id="modalLoja" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h2 id="modalTitle">Nome da Loja</h2>
+                    <span id="modalEstado" class="badge" style="margin-top: 5px; display: inline-block;"></span>
+                </div>
+                <button class="btn btn-outline" style="padding: 8px;" onclick="window.fecharModal()"><i
+                        class="ph ph-x"></i></button>
+            </div>
+            <div style="margin-bottom: 24px;">
+                <textarea id="novoComentario" rows="3"
+                    placeholder="Descreva a ocorrência ou atualização técnica..."></textarea>
+                <input type="url" id="anexoComentario" placeholder="Link de imagem/anexo (Opcional)"
+                    style="margin-top: 10px; margin-bottom: 5px; width: 100%;">
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <select id="tagComentario" style="flex: 1;">
                         <option value="Hardware">Hardware</option>
                         <option value="Software">Software</option>
                         <option value="Degust">Degust</option>
@@ -122,8 +290,8 @@
                         <option value="3S">3S</option>
                         <option value="POS">POS</option>
                     </select>
-                    <select id="setorFilter" onchange="window.renderizarLojas()">
-                        <option value="todos">Todos os Setores</option>
+                    <select id="setorComentario" style="flex: 1;">
+                        <option value="">Setor (Opcional)</option>
                         <option value="Financeiro">Financeiro</option>
                         <option value="Fiscal">Fiscal</option>
                         <option value="Auditoria">Auditoria</option>
@@ -134,112 +302,27 @@
                         <option value="Operação">Operação</option>
                         <option value="CD">CD</option>
                     </select>
-                    <select id="sortOrder" onchange="window.renderizarLojas()">
-                        <option value="pendentes-topo">Prioridade (Pendentes p/ Topo)</option>
-                        <option value="recentes">Atualizações Recentes</option>
-                        <option value="loja-az">Lojas (A-Z)</option>
-                        <option value="estado-az">Regional (A-Z)</option>
-                    </select>
-                </div>
-            </div>
-
-            <div id="lojas-container"></div>
-        </div>
-
-        <div id="view-projetos" style="display: none;">
-
-            <div class="header-actions" style="margin-bottom: 24px;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <button class="btn-menu-toggle" onclick="window.toggleSidebar()"><i class="ph ph-list"></i></button>
-                    <h1 class="page-title">Tarefas e Projetos</h1>
-                </div>
-                <button class="btn btn-outline" onclick="window.exportarProjetosCSV()">
-                    <i class="ph ph-download-simple"></i> Exportar Relatório
-                </button>
-            </div>
-            
-            <div id="membrosEquipeContainer" style="display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap;">
-                <!-- Carregado via JS -->
-            </div>
-            <div class="chart-container" style="margin-bottom: 24px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                    <h3 style="margin-top: 0; margin-bottom: 0;">Registrar Nova Demanda</h3>
-                    <button class="btn btn-outline" style="font-size: 0.8rem;" onclick="window.abrirModalEquipe()">
-                        <i class="ph ph-users"></i> Equipe
+                    <button class="btn btn-primary" onclick="window.salvarComentario()">
+                        <i class="ph ph-paper-plane-right"></i> Registrar
                     </button>
                 </div>
-                <input type="text" id="projDesc" placeholder="Descrição da tarefa ou projeto" style="margin-bottom: 12px;">
-                <div style="display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
-                    <input type="text" id="projDemand" placeholder="Demandante" style="flex: 2; min-width: 150px;">
-                    <input type="date" id="projDate" style="flex: 1; min-width: 120px;">
-                    <select id="projStatus" style="flex: 1; min-width: 120px;">
-                        <option value="Pendente">Pendente</option>
-                        <option value="Em Andamento">Em Andamento</option>
-                        <option value="Concluído">Concluído</option>
-                    </select>
-                </div>
-                <!-- Link para a tarefa -->
-                <input type="url" id="projAnexo" placeholder="Link para visualização/anexo (Opcional)" style="margin-bottom: 12px; width: 100%;">
-                
-                <button class="btn btn-primary" onclick="window.salvarProjeto()">
-                    <i class="ph ph-floppy-disk"></i> Salvar Registro
-                </button>
             </div>
-            
-            <div class="kanban-board" id="projetos-list">
-                <!-- Kanban JS -->
-            </div>
-        </div>
-        
-        <div id="view-atas" style="display: none;">
-            <div class="header-actions">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <button class="btn-menu-toggle" onclick="window.toggleSidebar()"><i class="ph ph-list"></i></button>
-                    <h1 class="page-title">Ata de Reuniões Semanais</h1>
-                </div>
-            </div>
-            <div class="chart-container" style="margin-bottom: 24px;">
-                <h3 style="margin-top: 0; margin-bottom: 12px;"><i class="ph ph-file-text"></i> Nova Ata Documentada</h3>
-                <input type="text" id="ataTitulo" placeholder="Título / Assunto Principal" style="width: 100%; margin-bottom: 10px; font-weight: bold;">
-                <textarea id="ataTexto" rows="5" placeholder="Descreva os tópicos abordados nesta reunião..." style="width: 100%; margin-bottom: 15px;"></textarea>
-                <button class="btn btn-primary" onclick="window.salvarAta()">
-                    <i class="ph ph-floppy-disk"></i> Registrar Ata
-                </button>
-            </div>
-            <div id="listaAtasContainer">
-                <!-- Populado JS -->
-            </div>
-        </div>
 
-        <div id="view-bi" style="display: none; height: 100%;">
-            <div class="header-actions">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <button class="btn-menu-toggle" onclick="window.toggleSidebar()"><i class="ph ph-list"></i></button>
-                    <h1 class="page-title">Power BI da TI</h1>
-                </div>
-            </div>
-            <div style="width: 100%; height: calc(100vh - 120px); border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                <iframe title="Power BI da TI" width="100%" height="100%" src="https://app.powerbi.com/view?r=eyJrIjoiY2NkNzdmYmQtMWMwNS00NzU0LWFmMGMtNWViM2Q3NzBkZWRjIiwidCI6IjE3ZmUxNDY1LWZlNjEtNGVmMy1hYThlLWZhOWU5YzY1MGJiOSJ9" frameborder="0" allowFullScreen="true" style="border: none;"></iframe>
-            </div>
+            <div id="listaComentarios"></div>
         </div>
+    </div>
 
-    </main>
-</div>
-
-<div id="modalLoja" class="modal-overlay">
-    <div class="modal-content">
-        <div class="modal-header">
-            <div>
-                <h2 id="modalTitle">Nome da Loja</h2>
-                <span id="modalEstado" class="badge" style="margin-top: 5px; display: inline-block;"></span>
+    <div id="modalEditLog" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Chamado</h2>
+                <button class="btn btn-outline" style="padding: 8px;" onclick="window.fecharModalEditLog()"><i
+                        class="ph ph-x"></i></button>
             </div>
-            <button class="btn btn-outline" style="padding: 8px;" onclick="window.fecharModal()"><i class="ph ph-x"></i></button>
-        </div>
-        <div style="margin-bottom: 24px;">
-            <textarea id="novoComentario" rows="3" placeholder="Descreva a ocorrência ou atualização técnica..."></textarea>
-            <input type="url" id="anexoComentario" placeholder="Link de imagem/anexo (Opcional)" style="margin-top: 10px; margin-bottom: 5px; width: 100%;">
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <select id="tagComentario" style="flex: 1;">
+            <input type="hidden" id="editLogId">
+            <textarea id="editLogTexto" rows="3" style="margin-bottom: 10px;"></textarea>
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <select id="editLogTag" style="flex: 1;">
                     <option value="Hardware">Hardware</option>
                     <option value="Software">Software</option>
                     <option value="Degust">Degust</option>
@@ -247,7 +330,7 @@
                     <option value="3S">3S</option>
                     <option value="POS">POS</option>
                 </select>
-                <select id="setorComentario" style="flex: 1;">
+                <select id="editLogSetor" style="flex: 1;">
                     <option value="">Setor (Opcional)</option>
                     <option value="Financeiro">Financeiro</option>
                     <option value="Fiscal">Fiscal</option>
@@ -259,91 +342,55 @@
                     <option value="Operação">Operação</option>
                     <option value="CD">CD</option>
                 </select>
-                <button class="btn btn-primary" onclick="window.salvarComentario()">
-                    <i class="ph ph-paper-plane-right"></i> Registrar
-                </button>
             </div>
+            <button class="btn btn-primary" style="width: 100%; justify-content: center;"
+                onclick="window.confirmarEdicaoLog()">Salvar Alterações</button>
         </div>
-
-        <div id="listaComentarios"></div>
     </div>
-</div>
 
-    <div id="modalEditLog" class="modal-overlay">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Editar Chamado</h2>
-            <button class="btn btn-outline" style="padding: 8px;" onclick="window.fecharModalEditLog()"><i class="ph ph-x"></i></button>
+    <div id="modalEditProj" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Tarefa</h2>
+                <button class="btn btn-outline" style="padding: 8px;" onclick="window.fecharModalEditProj()"><i
+                        class="ph ph-x"></i></button>
+            </div>
+            <input type="hidden" id="editProjId">
+            <input type="text" id="editProjDesc" style="margin-bottom: 12px;" placeholder="Descrição da tarefa">
+            <div style="display: flex; gap: 12px; margin-bottom: 15px;">
+                <input type="text" id="editProjDemand" style="flex: 2;" placeholder="Demandante">
+                <input type="date" id="editProjDate" style="flex: 1;">
+                <select id="editProjMember" style="flex: 1.5;">
+                    <!-- Populado JS -->
+                </select>
+                <select id="editProjStatus" style="flex: 1.2;">
+                    <option value="Pendente">Pendente</option>
+                    <option value="Em Andamento">Em Andamento</option>
+                    <option value="Concluído">Concluído</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" style="width: 100%; justify-content: center;"
+                onclick="window.confirmarEdicaoProj()">Salvar Alterações</button>
         </div>
-        <input type="hidden" id="editLogId">
-        <textarea id="editLogTexto" rows="3" style="margin-bottom: 10px;"></textarea>
-        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-            <select id="editLogTag" style="flex: 1;">
-                <option value="Hardware">Hardware</option>
-                <option value="Software">Software</option>
-                <option value="Degust">Degust</option>
-                <option value="Athenas">Athenas</option>
-                <option value="3S">3S</option>
-                <option value="POS">POS</option>
-            </select>
-            <select id="editLogSetor" style="flex: 1;">
-                <option value="">Setor (Opcional)</option>
-                <option value="Financeiro">Financeiro</option>
-                <option value="Fiscal">Fiscal</option>
-                <option value="Auditoria">Auditoria</option>
-                <option value="TI">TI</option>
-                <option value="Controladoria">Controladoria</option>
-                <option value="Gente e Gestão">Gente e Gestão</option>
-                <option value="Marketing">Marketing</option>
-                <option value="Operação">Operação</option>
-                <option value="CD">CD</option>
-            </select>
-        </div>
-        <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="window.confirmarEdicaoLog()">Salvar Alterações</button>
     </div>
-</div>
 
-<div id="modalEditProj" class="modal-overlay">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Editar Tarefa</h2>
-            <button class="btn btn-outline" style="padding: 8px;" onclick="window.fecharModalEditProj()"><i class="ph ph-x"></i></button>
+    <div id="modalEquipe" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Gerenciar Equipe</h2>
+                <button class="btn btn-outline" style="padding: 8px;" onclick="window.fecharModalEquipe()"><i
+                        class="ph ph-x"></i></button>
+            </div>
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <input type="text" id="novoMembroNome" placeholder="Nome do novo membro">
+                <button class="btn btn-primary" onclick="window.adicionarMembro()">Adicionar</button>
+            </div>
+            <div id="listaEquipeGerenciar"></div>
         </div>
-        <input type="hidden" id="editProjId">
-        <input type="text" id="editProjDesc" style="margin-bottom: 12px;" placeholder="Descrição da tarefa">
-        <div style="display: flex; gap: 12px; margin-bottom: 15px;">
-            <input type="text" id="editProjDemand" style="flex: 2;" placeholder="Demandante">
-            <input type="date" id="editProjDate" style="flex: 1;">
-            <select id="editProjMember" style="flex: 1.5;">
-                <!-- Populado JS -->
-            </select>
-            <select id="editProjStatus" style="flex: 1.2;">
-                <option value="Pendente">Pendente</option>
-                <option value="Em Andamento">Em Andamento</option>
-                <option value="Concluído">Concluído</option>
-            </select>
-        </div>
-        <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="window.confirmarEdicaoProj()">Salvar Alterações</button>
     </div>
-</div>
 
-<div id="modalEquipe" class="modal-overlay">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Gerenciar Equipe</h2>
-            <button class="btn btn-outline" style="padding: 8px;" onclick="window.fecharModalEquipe()"><i class="ph ph-x"></i></button>
-        </div>
-        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-            <input type="text" id="novoMembroNome" placeholder="Nome do novo membro">
-            <button class="btn btn-primary" onclick="window.adicionarMembro()">Adicionar</button>
-        </div>
-        <div id="listaEquipeGerenciar"></div>
-    </div>
-</div>
-    
-<script type="module" src="js/ti-main.js"></script>
+    <script type="module" src="js/ti-main.js"></script>
 
 </body>
 
 </html>
-
