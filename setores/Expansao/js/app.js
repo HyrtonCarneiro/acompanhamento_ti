@@ -1,5 +1,5 @@
 // setores/Expansao/js/app.js
-import { db, collection, getDocs, addDoc, updateDoc, doc, deleteDoc } from '../../../js/firebase-config.js';
+import { db, collection, getDocs, addDoc, updateDoc, doc, deleteDoc } from '../../../js/firebase.js';
 
 let currentUser = sessionStorage.getItem('loggedUser') || null;
 const obrasCollection = collection(db, "obras_expansao");
@@ -57,7 +57,7 @@ function initApp() {
         container.insertBefore(btn, container.querySelector('.page-title'));
     });
 
-    window.switchView('dashboard');
+    window.switchView('obras');
     carregarKanbanExpansao();
 }
 

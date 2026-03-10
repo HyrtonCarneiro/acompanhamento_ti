@@ -27,10 +27,10 @@
                 <i class="ph-fill ph-map-pin-line"></i> San Paolo Expansão
             </div>
             <div class="nav-menu">
-                <div class="nav-item active" onclick="window.switchView('dashboard')" id="nav-dashboard">
+                <div class="nav-item" onclick="window.switchView('dashboard')" id="nav-dashboard">
                     <i class="ph ph-chart-pie-slice"></i> Dashboard
                 </div>
-                <div class="nav-item" onclick="window.switchView('obras')" id="nav-obras">
+                <div class="nav-item active" onclick="window.switchView('obras')" id="nav-obras">
                     <i class="ph ph-buildings"></i> Obras & Projetos
                 </div>
                 <!-- Tarefas de Equipe Clássicas -->
@@ -59,7 +59,7 @@
 
         <main class="main-content">
             <!-- 1. DASHBOARD -->
-            <div id="view-dashboard">
+            <div id="view-dashboard" style="display: none;">
                 <div class="header-actions">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <button class="btn-menu-toggle" onclick="window.toggleSidebar()"><i
@@ -77,7 +77,7 @@
             </div>
 
             <!-- 2. OBRAS & PROJETOS KANBAN -->
-            <div id="view-obras" style="display: none; height: 100%; display: flex; flex-direction: column;">
+            <div id="view-obras" style="display: flex; height: 100%; flex-direction: column;">
                 <div class="header-actions" style="margin-bottom: 24px;">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <button class="btn-menu-toggle" onclick="window.toggleSidebar()"><i
