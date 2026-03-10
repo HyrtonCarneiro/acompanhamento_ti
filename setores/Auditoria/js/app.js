@@ -1,5 +1,5 @@
 // js/app.js da Auditoria
-import { db, collection, getDocs, addDoc, updateDoc, doc, deleteDoc, onSnapshot, query, orderBy, setDoc } from '../../js/firebase.js';
+import { db, collection, getDocs, addDoc, updateDoc, doc, deleteDoc, onSnapshot, query, orderBy, where } from '../../js/firebase.js';
 import { lojasIniciais } from '../../js/data.js';
 
 let currentUser = sessionStorage.getItem('loggedUser') || null;
@@ -226,7 +226,8 @@ function iniciarListenersAuditoria() {
         onSnapshot(collection(db, "auditoria_planejamento"), (snapshot) => {
             planejamentoCache = [];
             snapshot.forEach((doc) => {
-                planejamentoCache.push({ id: doc.id, ...doc.data() }); // O ID será o nome da loja
+                // Guarda o ID autogerado da collection para podermos dar update depois
+                planejamentoCache.push({ docId: doc.id, ...doc.data() });
             });
             renderizarTabelaPlanejamento();
         }, (err) => console.error("Erro Planejamento:", err));
@@ -317,8 +318,8 @@ window.renderizarTabelaPlanejamento = function () {
     lojasIniciais.forEach(lojaBase => {
         // Ignorar a Matriz ou exibir, como preferir. Incluiremos.
 
-        // Busca Configuração do Planejamento
-        const cfg = planejamentoCache.find(p => p.id === lojaBase.nome) || {};
+        // Busca Configuração do Planejamento (usamos campo loja)
+        const cfg = planejamentoCache.find(p => p.loja === lojaBase.nome) || {};
 
         // Busca a Nota mais recente para esta loja
         const historicoLoja = notasCache.filter(n => n.loja === lojaBase.nome);
@@ -362,12 +363,17 @@ window.filtrarPlanejamento = function () {
 }
 
 window.abrirModalEditPlanejamento = function (nomeLoja) {
-    planejamentoAbertoId = nomeLoja;
+    // Busca configuração pré-existente se houver para trazer também o docId
+    const cfg = planejamentoCache.find(p => p.loja === nomeLoja) || {};
+
+    // Guardamos um objeto para update
+    planejamentoAbertoId = {
+        nomeLoja: nomeLoja,
+        docId: cfg.docId || null
+    };
+
     document.getElementById('modalPlanLojaNome').innerText = nomeLoja;
     document.getElementById('modalPlanId').value = nomeLoja;
-
-    // Busca configuração pré-existente se houver
-    const cfg = planejamentoCache.find(p => p.id === nomeLoja) || {};
 
     document.getElementById('modalPlanDataProx').value = cfg.dataProxima || '';
     document.getElementById('modalPlanAuditor').value = cfg.auditor || '';
@@ -388,15 +394,23 @@ window.salvarPlanejamento = async function () {
     const auditor = document.getElementById('modalPlanAuditor').value.trim();
     const notasInternas = document.getElementById('modalPlanNotas').value.trim();
 
+    const payload = {
+        loja: planejamentoAbertoId.nomeLoja,
+        dataProxima,
+        auditor,
+        notasInternas,
+        regional: 'Nordeste',
+        updatedAt: new Date().toISOString()
+    };
+
     try {
-        // Usamos setDoc para forçar que o ID do documento seja o NOME da Loja, garantindo update ou create direto.
-        await setDoc(doc(db, "auditoria_planejamento", planejamentoAbertoId), {
-            dataProxima,
-            auditor,
-            notasInternas,
-            regional: 'Nordeste', // Para o MVP manteremos fixo preenchido ou buscaríamos do array,
-            updatedAt: new Date().toISOString()
-        }, { merge: true });
+        if (planejamentoAbertoId.docId) {
+            // Se já existe no Firebase um doc para essa loja, faça Update
+            await updateDoc(doc(db, "auditoria_planejamento", planejamentoAbertoId.docId), payload);
+        } else {
+            // Cria um novo doc
+            await addDoc(collection(db, "auditoria_planejamento"), payload);
+        }
 
         showToast("Agendamento de Auditoria salvo!", "success");
         window.fecharModalEditPlanejamento();
