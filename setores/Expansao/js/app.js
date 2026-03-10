@@ -760,7 +760,7 @@ window.renderGantt = function () {
     const hojeLinePx = hojeOffsetDays * DAY_WIDTH + (DAY_WIDTH / 2); // Meio do dia
 
     wrapper.innerHTML = `
-        <div class="gantt-header-row" style="z-index: 11; width: 100%;">
+        <div class="gantt-header-row" style="z-index: 11;">
             <div class="gantt-label" style="background:var(--bg-color); border-bottom: none; z-index:12; height: 100%;"></div>
             <div id="gantt-header-scroll" style="display:flex; flex-direction:column; overflow:hidden; flex: 1; min-width: 0;">
                 <div style="display:flex; width: ${totalVisDays * DAY_WIDTH}px">${monthsHtml}</div>
@@ -769,15 +769,14 @@ window.renderGantt = function () {
                 </div>
             </div>
         </div>
-        <div class="gantt-body" id="gantt-body-scroll" style="width: 100%; min-width: 0;" onscroll="document.getElementById('gantt-header-scroll').scrollLeft = this.scrollLeft">
+        <div class="gantt-body" id="gantt-body-scroll" style="min-width: 0;" onscroll="document.getElementById('gantt-header-scroll').scrollLeft = this.scrollLeft">
             <div style="display: flex; min-width: ${(totalVisDays * DAY_WIDTH) + 250}px">
                 <div style="width: 250px; flex-shrink: 0; z-index: 10; background: var(--surface);">
-                    <!-- Coluna fantasma para empurrar as linhas caso o sticky falhe, embora o row label fará o sticky in-line -->
                 </div>
-                <!-- O CSS do .gantt-label (sticky right=0) fará ele grudar. Precisamos ajustar o HTML das Rows pois agora o label está DENTRO do trecho que rola em X -->
             </div>
         </div>
     `;
+
 
 
     // Vamos reconstruir o Body de uma forma mais resiliente para o sticky
