@@ -415,7 +415,55 @@
                             </div>
                         </div>
 
+                        <!-- 🛠️ GESTÃO DE STAKEHOLDERS -->
+                        <div
+                            style="background: rgba(218, 13, 23, 0.03); padding: 15px; border-radius: 12px; border: 1px dashed var(--border); margin-bottom: 24px;">
+                            <h4
+                                style="margin: 0 0 15px 0; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; color: var(--text-main);">
+                                <i class="ph ph-users-three" style="color: var(--primary);"></i> Gestão de Stakeholders
+                            </h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                                <div>
+                                    <label
+                                        style="display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">Engenheiro
+                                        Responsável</label>
+                                    <input type="text" id="modalCardEngenheiro" placeholder="Nome / Empresa"
+                                        style="width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text-main); font-size:0.85rem;">
+                                </div>
+                                <div>
+                                    <label
+                                        style="display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">Mestre
+                                        de Obras</label>
+                                    <input type="text" id="modalCardMestre" placeholder="Nome do Mestre..."
+                                        style="width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text-main); font-size:0.85rem;">
+                                </div>
+                            </div>
+
+                            <label
+                                style="display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">Fornecedores
+                                e Terceiros Registrados</label>
+
+                            <!-- Box Dinâmico de Fornecedores -->
+                            <div id="modalFornecedoresContainer"
+                                style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; max-height: 150px; overflow-y: auto;">
+                                <!-- Itens via JS -->
+                            </div>
+
+                            <!-- Adicionar Novo Fornecedor -->
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="novoFornNomeInput" placeholder="Ex: Serralheria do João"
+                                    style="flex: 2; padding: 8px; border: 1px solid var(--border); border-radius: 6px; font-size:0.85rem;">
+                                <input type="text" id="novoFornContatoInput" placeholder="Serviço / Contato"
+                                    style="flex: 1.5; padding: 8px; border: 1px solid var(--border); border-radius: 6px; font-size:0.85rem;">
+                                <button class="btn btn-outline" style="border-radius: 6px; padding: 8px 12px;"
+                                    onclick="window.addFornecedorCard()">
+                                    <i class="ph ph-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+
                         <!-- Checklists -->
+
                         <div>
                             <div
                                 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">

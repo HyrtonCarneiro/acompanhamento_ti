@@ -2,14 +2,16 @@
 import { db, collection, getDocs, addDoc, updateDoc, doc, deleteDoc, onSnapshot, query, orderBy } from '../../../js/firebase.js';
 import { lojasIniciais } from '../../../js/data.js';
 
-let currentUser = sessionStorage.getItem('loggedUser') || null;
+let db, collection, addDoc, getDocs, onSnapshot, doc, updateDoc, deleteDoc;
+let currentUser = "admin";
 let obrasCache = [];
 let cardAbertoId = null;
 let checklistsCache = [];
 let comentariosCache = [];
 let anexosCache = [];
-
-let equipeExp = [];
+let fornecedoresCache = []; // ✅ Variável global para gerenciar os fornecedores de material no frontend
+let isThemeDark = false;
+let equipeExpansao = [];
 let projetosExp = [];
 let chartObrasStatusInst = null;
 let chartObrasTagsInst = null;
@@ -520,6 +522,12 @@ window.abrirModalCardExpansao = function (id = null) {
         if (document.getElementById('novoChecklistItemInput')) document.getElementById('novoChecklistItemInput').value = '';
         if (document.getElementById('novoComentarioCard')) document.getElementById('novoComentarioCard').value = '';
 
+        // Limpar Stakeholders
+        if (document.getElementById('modalCardEngenheiro')) document.getElementById('modalCardEngenheiro').value = '';
+        if (document.getElementById('modalCardMestre')) document.getElementById('modalCardMestre').value = '';
+        if (document.getElementById('novoFornNomeInput')) document.getElementById('novoFornNomeInput').value = '';
+        if (document.getElementById('novoFornContatoInput')) document.getElementById('novoFornContatoInput').value = '';
+
         document.getElementById('displayCardId').textContent = 'Novo Workflow';
         document.getElementById('displayCardCriador').textContent = window.currentUser || 'Sistema';
         if (document.getElementById('modalChecklistPercent')) document.getElementById('modalChecklistPercent').textContent = '0%';
@@ -528,9 +536,12 @@ window.abrirModalCardExpansao = function (id = null) {
         checklistsCache = [];
         comentariosCache = [];
         anexosCache = [];
+        fornecedoresCache = [];
+
         renderChecklists();
         renderComentarios();
         renderAnexos();
+        renderFornecedores(); // Iniciar UI dos fornecedores limpa
 
         document.getElementById('btnExcluirCardExpansao').style.display = 'none';
 
@@ -554,13 +565,19 @@ window.abrirModalCardExpansao = function (id = null) {
                 document.getElementById('modalCustoPrev').value = obra.custoPrev || '';
                 document.getElementById('modalCustoReal').value = obra.custoReal || '';
 
+                // Carregar Stakeholders
+                if (document.getElementById('modalCardEngenheiro')) document.getElementById('modalCardEngenheiro').value = obra.engenheiro || '';
+                if (document.getElementById('modalCardMestre')) document.getElementById('modalCardMestre').value = obra.mestreObras || '';
+
                 checklistsCache = obra.checklists || [];
                 comentariosCache = obra.comentarios || [];
                 anexosCache = obra.anexos || [];
+                fornecedoresCache = obra.fornecedores || [];
 
                 renderChecklists();
                 renderComentarios();
                 renderAnexos();
+                renderFornecedores();
 
                 document.getElementById('btnExcluirCardExpansao').style.display = 'inline-block';
             }
@@ -598,6 +615,10 @@ window.salvarCardExpansao = async function () {
         const custoPrev = document.getElementById('modalCustoPrev')?.value || '';
         const custoReal = document.getElementById('modalCustoReal')?.value || '';
 
+        // Capturar Stakeholders
+        const engenheiro = document.getElementById('modalCardEngenheiro')?.value.trim() || '';
+        const mestreObras = document.getElementById('modalCardMestre')?.value.trim() || '';
+
         if (!titulo) {
             showToast("O título da obra é obrigatório", "warning");
             return;
@@ -611,9 +632,11 @@ window.salvarCardExpansao = async function () {
 
         const payload = {
             titulo, loja, status, tag, dataInicio, dataFim, custoPrev, custoReal,
+            engenheiro, mestreObras,
             checklists: checklistsCache,
             comentarios: comentariosCache,
-            anexos: anexosCache
+            anexos: anexosCache,
+            fornecedores: fornecedoresCache
         };
 
         if (id) {
@@ -646,6 +669,61 @@ window.excluirObra = async function () {
             console.error(e);
             showToast("Erro ao excluir obra", "error");
         }
+    }
+}
+
+// ================== FUNÇÕES DE FORNECEDORES ================== //
+window.renderFornecedores = function () {
+    const list = document.getElementById('modalFornecedoresContainer');
+    if (!list) return;
+    list.innerHTML = "";
+
+    if (fornecedoresCache.length === 0) {
+        list.innerHTML = `<span style="display:block; font-size: 0.8rem; color: var(--text-muted); text-align: center; font-style: italic; padding: 10px 0;">Nenhum fornecedor cadastrado</span>`;
+        return;
+    }
+
+    fornecedoresCache.forEach((f, index) => {
+        const div = document.createElement('div');
+        div.style.cssText = "display: flex; justify-content: space-between; align-items: center; background: var(--surface); padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px;";
+
+        div.innerHTML = `
+            <div style="display: flex; flex-direction: column; flex: 1; overflow: hidden; padding-right: 10px;">
+                <span style="font-weight: 600; font-size: 0.85rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${f.nome}</span>
+                <span style="font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${f.contato}</span>
+            </div>
+            <button class="btn btn-outline" style="padding: 4px; border-radius: 4px; border: none; color: var(--danger);" onclick="window.removerFornecedor(${index})">
+                <i class="ph ph-trash"></i>
+            </button>
+        `;
+        list.appendChild(div);
+    });
+}
+
+window.addFornecedorCard = function () {
+    const inputNome = document.getElementById('novoFornNomeInput');
+    const inputContato = document.getElementById('novoFornContatoInput');
+
+    if (!inputNome || !inputContato) return;
+
+    const nome = inputNome.value.trim();
+    const contato = inputContato.value.trim();
+
+    if (!nome) {
+        showToast("Insira o nome do fornecedor/empresa", "warning");
+        return;
+    }
+
+    fornecedoresCache.push({ nome, contato });
+    inputNome.value = '';
+    inputContato.value = '';
+    renderFornecedores();
+}
+
+window.removerFornecedor = function (index) {
+    if (confirm("Remover este fornecedor?")) {
+        fornecedoresCache.splice(index, 1);
+        renderFornecedores();
     }
 }
 
