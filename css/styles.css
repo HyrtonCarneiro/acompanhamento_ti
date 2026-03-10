@@ -1276,8 +1276,10 @@ textarea:focus {
     border-bottom: 2px solid var(--border);
     position: sticky;
     top: 0;
-    z-index: 10;
+    z-index: 4;
+    /* Abaixo do sidebar (que costuma ser mais alto) */
     background: var(--surface);
+    width: 100%;
 }
 
 .gantt-month {
@@ -1312,9 +1314,11 @@ textarea:focus {
 
 .gantt-body {
     flex: 1;
-    overflow-y: auto;
+    overflow: auto;
+    /* Permite rolar em X e Y perfeitamente */
     position: relative;
     background: var(--bg-color);
+    width: 100%;
 }
 
 .gantt-row {
@@ -1331,6 +1335,7 @@ textarea:focus {
 .gantt-label {
     width: 250px;
     min-width: 250px;
+    max-width: 250px;
     padding: 10px 15px;
     border-right: 2px solid var(--border);
     display: flex;
@@ -1339,7 +1344,8 @@ textarea:focus {
     background: var(--surface);
     position: sticky;
     left: 0;
-    z-index: 5;
+    z-index: 3;
+    /* Stick com z-index menor que o menu top e sidebar */
 }
 
 .gantt-label h4 {
