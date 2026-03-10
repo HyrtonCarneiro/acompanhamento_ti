@@ -2,8 +2,7 @@
 import { db, collection, getDocs, addDoc, updateDoc, doc, deleteDoc, onSnapshot, query, orderBy } from '../../../js/firebase.js';
 import { lojasIniciais } from '../../../js/data.js';
 
-let db, collection, addDoc, getDocs, onSnapshot, doc, updateDoc, deleteDoc;
-let currentUser = "admin";
+let currentUser = sessionStorage.getItem('loggedUser') || null;
 let obrasCache = [];
 let cardAbertoId = null;
 let checklistsCache = [];
@@ -11,7 +10,7 @@ let comentariosCache = [];
 let anexosCache = [];
 let fornecedoresCache = []; // ✅ Variável global para gerenciar os fornecedores de material no frontend
 let isThemeDark = false;
-let equipeExpansao = [];
+let equipeExp = [];
 let projetosExp = [];
 let chartObrasStatusInst = null;
 let chartObrasTagsInst = null;
