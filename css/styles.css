@@ -29,11 +29,14 @@ body.dark-mode {
     --primary: var(--sp-red);
     --secondary: var(--sp-morango);
     --accent: var(--sp-laranja);
-    --bg-color: #3b200e;
-    /* Um café mais profundo para n ofuscar */
-    --surface: var(--sp-cafe);
-    --text-main: var(--sp-ninho);
-    --text-muted: #b8a695;
+    --bg-color: #1a0f07;
+    /* Cafézinho quase preto para focar no conteúdo */
+    --surface: #362011;
+    /* Superfície levemente mais clara que fundo, mas escura o suficiente para texto claro */
+    --text-main: #f5f0e6;
+    /* Off-white mais brilhante que ninho para leitura limpa */
+    --text-muted: #d4bda8;
+    /* Contraste intermediário visível */
     --border: #4a2815;
 }
 
@@ -96,7 +99,7 @@ body {
 }
 
 .dark-mode .btn-danger:hover {
-    background: #8f0810;
+    background: #b91c1c;
     color: white;
     border-color: transparent;
 }
@@ -230,8 +233,8 @@ textarea:focus {
 
 .dark-mode .nav-item.active {
     background: rgba(218, 13, 23, 0.2);
-    border-left-color: var(--sp-ninho);
-    color: var(--sp-ninho);
+    border-left-color: var(--sp-red);
+    color: #ff9999;
 }
 
 .user-section {
@@ -672,8 +675,8 @@ textarea:focus {
 }
 
 .dark-mode .status-badge-pendente {
-    background: #4d1814;
-    color: var(--sp-morango);
+    background: rgba(218, 13, 23, 0.15);
+    color: #ffb3b3;
     border: 1px solid var(--sp-red);
 }
 
@@ -684,9 +687,9 @@ textarea:focus {
 }
 
 .dark-mode .status-badge-andamento {
-    background: #713f12;
-    color: #facc15;
-    border: 1px solid #eab308;
+    background: rgba(218, 85, 19, 0.15);
+    color: #fcd34d;
+    border: 1px solid var(--sp-laranja);
 }
 
 .status-badge-concluido {
@@ -696,7 +699,7 @@ textarea:focus {
 }
 
 .dark-mode .status-badge-concluido {
-    background: #143521;
+    background: rgba(79, 112, 57, 0.15);
     color: #a7f3d0;
     border: 1px solid var(--sp-pistache);
 }
@@ -719,7 +722,7 @@ textarea:focus {
 }
 
 .hub-card:hover {
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
     transform: translateY(-5px);
     border-color: var(--accent);
 }
