@@ -64,15 +64,33 @@
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <button class="btn-menu-toggle" onclick="window.toggleSidebar()"><i
                                 class="ph ph-list"></i></button>
-                        <h1 class="page-title">Dashboard</h1>
+                        <h1 class="page-title">Dashboard Analítico</h1>
                     </div>
                 </div>
-                <div style="padding: 40px; text-align: center; margin-top: 50px;">
-                    <i class="ph ph-chart-line-up"
-                        style="font-size: 4rem; color: var(--primary); margin-bottom: 20px;"></i>
-                    <h2>Área em Desenvolvimento</h2>
-                    <p style="color: var(--text-muted); max-width: 500px; margin: 10px auto;">Os indicadores e gráficos
-                        do Dashboard de Expansão estarão disponíveis em breve nesta seção.</p>
+
+                <div class="analytics-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon blue"><i class="ph ph-buildings"></i></div>
+                        <div>
+                            <p class="stat-value" id="statTotalObras">0</p>
+                            <p class="stat-label">Total de Obras / Jobs</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon red"><i class="ph ph-warning-circle"></i></div>
+                        <div>
+                            <p class="stat-value" id="statObrasAtrasadas">0</p>
+                            <p class="stat-label">Jobs em Atraso</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="analytics-grid">
+                    <div class="chart-container">
+                        <canvas id="chartObrasStatus"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chartObrasTags"></canvas>
+                    </div>
                 </div>
             </div>
 
@@ -175,19 +193,49 @@
 
             <!-- 3. TAREFAS GENERICAS -->
             <div id="view-tarefas" style="display: none;">
-                <div class="header-actions">
+                <div class="header-actions" style="margin-bottom: 24px;">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <button class="btn-menu-toggle" onclick="window.toggleSidebar()"><i
                                 class="ph ph-list"></i></button>
                         <h1 class="page-title">Tarefas Avulsas da Equipe</h1>
                     </div>
                 </div>
-                <div style="padding: 40px; text-align: center; margin-top: 50px;">
-                    <i class="ph ph-list-checks"
-                        style="font-size: 4rem; color: var(--primary); margin-bottom: 20px;"></i>
-                    <h2>Área em Desenvolvimento</h2>
-                    <p style="color: var(--text-muted); max-width: 500px; margin: 10px auto;">O antigo quadro de tarefas
-                        será focado apenas em demandas administrativas.</p>
+
+                <div id="membrosEquipeContainer"
+                    style="display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap;">
+                    <!-- Carregado via JS -->
+                </div>
+
+                <div class="chart-container" style="margin-bottom: 24px;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h3 style="margin-top: 0; margin-bottom: 0;">Registrar Nova Demanda Administrativa</h3>
+                        <button class="btn btn-outline" style="font-size: 0.8rem;"
+                            onclick="window.abrirModalEquipeExp()">
+                            <i class="ph ph-users"></i> Equipe
+                        </button>
+                    </div>
+                    <input type="text" id="projDesc" placeholder="Descrição da tarefa ou projeto interno"
+                        style="margin-bottom: 12px; width: 100%;">
+                    <div style="display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+                        <input type="text" id="projDemand" placeholder="Demandante" style="flex: 2; min-width: 150px;">
+                        <input type="date" id="projDate" style="flex: 1; min-width: 120px;">
+                        <select id="projStatus" style="flex: 1; min-width: 120px;">
+                            <option value="Pendente">Pendente</option>
+                            <option value="Em Andamento">Em Andamento</option>
+                            <option value="Concluído">Concluído</option>
+                        </select>
+                    </div>
+                    <input type="url" id="projAnexo" placeholder="Link para doc/anexo (Opcional)"
+                        style="margin-bottom: 12px; width: 100%;">
+
+                    <button class="btn btn-primary" onclick="window.salvarProjeto()">
+                        <i class="ph ph-floppy-disk"></i> Salvar Registro
+                    </button>
+                </div>
+
+                <div class="kanban-board" id="projetos-list">
+                    <!-- Kanban JS de Tarefas da Equipe -->
                 </div>
             </div>
 
@@ -357,6 +405,24 @@
                             class="ph ph-floppy-disk"></i> Salvar Workflow</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- MODAL EQUIPE EXPANSÃO -->
+    <div id="modalEquipeObj" class="modal-overlay">
+        <div class="modal-content" style="max-width: 400px; width: 90%;">
+            <div class="modal-header">
+                <h2>Gerenciar Equipe Expansão</h2>
+                <button class="btn btn-outline" style="padding: 8px;" onclick="window.fecharModalEquipeExp()"><i
+                        class="ph ph-x"></i></button>
+            </div>
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <input type="text" id="novoMembroExp" placeholder="Nome do integrante"
+                    style="flex:1; border: 1px solid var(--border); border-radius: 6px; padding: 8px; background: var(--bg-color); color: var(--text-main);">
+                <button class="btn btn-primary" onclick="window.addMembroEquipeExp()"><i
+                        class="ph ph-plus"></i></button>
+            </div>
+            <ul id="listaMembrosExp" style="list-style: none; padding: 0; margin: 0;"></ul>
         </div>
     </div>
 
