@@ -12,6 +12,8 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <link rel="stylesheet" href="../../css/styles.css">
 </head>
 
@@ -264,19 +266,49 @@
             </div>
 
             <div id="view-tarefas" style="display: none;">
-                <div class="header-actions">
+                <div class="header-actions" style="margin-bottom: 24px;">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <button class="btn-menu-toggle" onclick="window.toggleSidebar()"><i
                                 class="ph ph-list"></i></button>
-                        <h1 class="page-title">Tarefas da Equipe</h1>
+                        <h1 class="page-title">Tarefas e Projetos</h1>
                     </div>
+                    <button class="btn btn-outline" onclick="window.exportarAudiProjetosCSV()">
+                        <i class="ph ph-download-simple"></i> Exportar Relatório
+                    </button>
                 </div>
-                <div style="padding: 40px; text-align: center; margin-top: 50px;">
-                    <i class="ph ph-kanban" style="font-size: 4rem; color: var(--primary); margin-bottom: 20px;"></i>
-                    <h2>Área em Desenvolvimento</h2>
-                    <p style="color: var(--text-muted); max-width: 500px; margin: 10px auto;">O quadro Kanban para
-                        acompanhamento de tarefas da equipe será implementado nesta seção.</p>
+
+                <div id="audiMembrosEquipeContainer"
+                    style="display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap;"></div>
+
+                <div class="chart-container" style="margin-bottom: 24px;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h3 style="margin-top: 0; margin-bottom: 0;">Registrar Nova Demanda</h3>
+                        <button class="btn btn-outline" style="font-size: 0.8rem;"
+                            onclick="window.abrirModalAudiEquipe()">
+                            <i class="ph ph-users"></i> Equipe
+                        </button>
+                    </div>
+                    <input type="text" id="audiProjDesc" placeholder="Descrição da tarefa ou projeto"
+                        style="margin-bottom: 12px;">
+                    <div style="display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+                        <input type="text" id="audiProjDemand" placeholder="Demandante"
+                            style="flex: 2; min-width: 150px;">
+                        <input type="date" id="audiProjDate" style="flex: 1; min-width: 120px;">
+                        <select id="audiProjStatus" style="flex: 1; min-width: 120px;">
+                            <option value="Pendente">Pendente</option>
+                            <option value="Em Andamento">Em Andamento</option>
+                            <option value="Concluído">Concluído</option>
+                        </select>
+                    </div>
+                    <input type="url" id="audiProjAnexo" placeholder="Link para visualização/anexo (Opcional)"
+                        style="margin-bottom: 12px; width: 100%;">
+                    <button class="btn btn-primary" onclick="window.salvarAudiProjeto()">
+                        <i class="ph ph-floppy-disk"></i> Salvar Registro
+                    </button>
                 </div>
+
+                <div class="kanban-board" id="audi-projetos-list"></div>
             </div>
 
             <div id="view-metapwr" style="display: none;">
@@ -360,6 +392,48 @@
     </div>
 
     <script type="module" src="js/app.js"></script>
+
+    <!-- MODAL EDITAR TAREFA AUDITORIA -->
+    <div id="modalEditAudiProj" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Tarefa</h2>
+                <button class="btn btn-outline" style="padding: 8px;" onclick="window.fecharModalEditAudiProj()"><i
+                        class="ph ph-x"></i></button>
+            </div>
+            <input type="hidden" id="editAudiProjId">
+            <input type="text" id="editAudiProjDesc" style="margin-bottom: 12px;" placeholder="Descrição da tarefa">
+            <div style="display: flex; gap: 12px; margin-bottom: 15px;">
+                <input type="text" id="editAudiProjDemand" style="flex: 2;" placeholder="Demandante">
+                <input type="date" id="editAudiProjDate" style="flex: 1;">
+                <select id="editAudiProjMember" style="flex: 1.5;"></select>
+                <select id="editAudiProjStatus" style="flex: 1.2;">
+                    <option value="Pendente">Pendente</option>
+                    <option value="Em Andamento">Em Andamento</option>
+                    <option value="Concluído">Concluído</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" style="width: 100%; justify-content: center;"
+                onclick="window.confirmarEdicaoAudiProj()">Salvar Alterações</button>
+        </div>
+    </div>
+
+    <!-- MODAL EQUIPE AUDITORIA -->
+    <div id="modalAudiEquipe" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Gerenciar Equipe</h2>
+                <button class="btn btn-outline" style="padding: 8px;" onclick="window.fecharModalAudiEquipe()"><i
+                        class="ph ph-x"></i></button>
+            </div>
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <input type="text" id="novoAudiMembroNome" placeholder="Nome do novo membro">
+                <button class="btn btn-primary" onclick="window.adicionarAudiMembro()">Adicionar</button>
+            </div>
+            <div id="listaAudiEquipeGerenciar"></div>
+        </div>
+    </div>
+
 </body>
 
 </html>

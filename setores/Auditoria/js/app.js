@@ -14,6 +14,11 @@ let planejamentoSortAsc = true;
 let chartMediaRegionalInst = null;
 let chartRankingLojasInst = null;
 
+// Caches de Tarefas/Equipe Auditoria
+let audiProjetos = {};
+let audiEquipe = [];
+let audiCurrentMember = null;
+
 window.toggleDarkMode = function () {
     document.body.classList.toggle('dark-mode');
     localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
@@ -252,6 +257,32 @@ function iniciarListenersAuditoria() {
             });
             renderizarTabelaPlanejamento();
         }, (err) => console.error("Erro Planejamento:", err));
+
+        // Listener de Projetos/Tarefas de Auditoria
+        const qAudiProj = query(collection(db, "auditoria_projetos"), orderBy("timestamp", "desc"));
+        onSnapshot(qAudiProj, (snapshot) => {
+            audiProjetos = {};
+            snapshot.forEach(docSnap => {
+                const data = docSnap.data();
+                data.firebaseId = docSnap.id;
+                if (!audiProjetos[data.membroResponsavel]) audiProjetos[data.membroResponsavel] = [];
+                audiProjetos[data.membroResponsavel].push(data);
+            });
+            renderizarAudiProjetosList();
+        }, (err) => console.error("Erro Projetos Audi:", err));
+
+        // Listener de Equipe da Auditoria
+        const qAudiEquipe = query(collection(db, "auditoria_equipe"), orderBy("nome"));
+        onSnapshot(qAudiEquipe, (snapshot) => {
+            audiEquipe = [];
+            snapshot.forEach(docSnap => audiEquipe.push({ firebaseId: docSnap.id, ...docSnap.data() }));
+            if (audiEquipe.length > 0 && (!audiCurrentMember || !audiEquipe.find(m => m.nome === audiCurrentMember))) {
+                audiCurrentMember = audiEquipe[0].nome;
+            }
+            renderizarBotoesAudiEquipe();
+            renderizarAudiProjetosList();
+            renderizarListaAudiEquipeGerenciar();
+        }, (err) => console.error("Erro Equipe Audi:", err));
 
     } catch (e) {
         console.error("Erro ao iniciar listeners auditoria", e);
@@ -578,6 +609,278 @@ function renderDashboard() {
             }
         });
     }
+}
+
+// ============================================
+// 4. TAREFAS/PROJETOS DA AUDITORIA (KANBAN)
+// ============================================
+
+window.switchAudiMember = function (name) {
+    audiCurrentMember = name;
+    renderizarBotoesAudiEquipe();
+    renderizarAudiProjetosList();
+}
+
+function renderizarBotoesAudiEquipe() {
+    const container = document.getElementById('audiMembrosEquipeContainer');
+    if (!container) return;
+    container.innerHTML = '';
+    audiEquipe.forEach(m => {
+        const btn = document.createElement('button');
+        btn.className = m.nome === audiCurrentMember ? 'btn btn-primary' : 'btn btn-outline';
+        btn.innerText = m.nome;
+        btn.onclick = () => window.switchAudiMember(m.nome);
+        container.appendChild(btn);
+    });
+}
+
+window.salvarAudiProjeto = async function () {
+    if (!audiCurrentMember) return showToast("Selecione ou crie um membro da equipe antes", "error");
+    const desc = document.getElementById('audiProjDesc').value;
+    const dem = document.getElementById('audiProjDemand').value;
+    const dt = document.getElementById('audiProjDate').value;
+    const status = document.getElementById('audiProjStatus').value;
+    const fileInput = document.getElementById('audiProjAnexo');
+
+    if (!desc || !dem || !dt) return showToast("Preencha os dados da tarefa", "error");
+    const [y, m, d] = dt.split('-');
+    let anexoUrl = fileInput ? fileInput.value.trim() : null;
+
+    try {
+        await addDoc(collection(db, "auditoria_projetos"), {
+            membroResponsavel: audiCurrentMember,
+            dataAtv: `${d}/${m}/${y}`,
+            desc: desc,
+            demandante: dem,
+            status: status,
+            anexoUrl: anexoUrl,
+            autor: currentUser,
+            timestamp: Date.now()
+        });
+        document.getElementById('audiProjDesc').value = '';
+        document.getElementById('audiProjDemand').value = '';
+        document.getElementById('audiProjStatus').value = 'Pendente';
+        if (fileInput) fileInput.value = '';
+        showToast("Tarefa registrada");
+    } catch (e) {
+        console.error(e);
+        showToast("Erro ao registrar tarefa", "error");
+    }
+}
+
+window.deletarAudiProjeto = async function (firebaseId) {
+    if (!confirm("Remover este registro?")) return;
+    try {
+        await deleteDoc(doc(db, "auditoria_projetos", firebaseId));
+        showToast("Tarefa removida");
+    } catch (e) {
+        console.error(e);
+        showToast("Erro ao remover tarefa", "error");
+    }
+}
+
+function renderizarAudiProjetosList() {
+    const container = document.getElementById('audi-projetos-list');
+    if (!container) return;
+    const projs = audiProjetos[audiCurrentMember] || [];
+    container.innerHTML = '';
+
+    if (projs.length === 0) {
+        container.innerHTML = `<div class="empty-state" style="width: 100%;"><i class="ph ph-kanban"></i><h2>Nenhum registro para ${audiCurrentMember || 'esta equipe'}</h2></div>`;
+        return;
+    }
+
+    const colunas = [
+        { id: 'Pendente', titulo: 'Pendentes', classBadge: 'status-badge-pendente' },
+        { id: 'Em Andamento', titulo: 'Em Andamento', classBadge: 'status-badge-andamento' },
+        { id: 'Concluído', titulo: 'Concluídos', classBadge: 'status-badge-concluido' }
+    ];
+
+    colunas.forEach(col => {
+        const projsNestaColuna = projs.filter(p => (p.status || 'Pendente') === col.id);
+        const colDiv = document.createElement('div');
+        colDiv.className = 'kanban-col';
+        colDiv.innerHTML = `
+            <div class="kanban-col-header">
+                <h3>${col.titulo}</h3>
+                <span class="kanban-col-count">${projsNestaColuna.length}</span>
+            </div>
+            <div class="kanban-items"></div>
+        `;
+        const itemsContainer = colDiv.querySelector('.kanban-items');
+
+        projsNestaColuna.forEach(p => {
+            const div = document.createElement('div');
+            div.className = 'comment-item';
+            div.style.marginBottom = '12px';
+            div.style.borderLeftColor = 'transparent';
+
+            let actionBtns = '';
+            actionBtns += `<button class="btn btn-outline" style="padding: 6px; margin-right: 5px;" onclick="window.abrirModalEditAudiProj('${p.firebaseId}')"><i class="ph ph-pencil"></i></button>`;
+            actionBtns += `<button class="btn btn-danger" style="padding: 6px;" onclick="window.deletarAudiProjeto('${p.firebaseId}')"><i class="ph ph-trash"></i></button>`;
+
+            let urlBadge = '';
+            if (p.anexoUrl) {
+                const isImg = p.anexoUrl.match(/\.(jpeg|jpg|gif|png|webp|bmp)(\?.*)?$/i);
+                if (isImg) {
+                    urlBadge = `<a href="${p.anexoUrl}" target="_blank"><img src="${p.anexoUrl}" style="max-height: 40px; border-radius: 4px; border: 1px solid var(--border); vertical-align: middle;"></a>`;
+                } else {
+                    urlBadge = `<a href="${p.anexoUrl}" target="_blank" class="badge" style="background:#e2e8f0; color:#0f172a; text-decoration:none;"><i class="ph ph-link"></i> Ver Link</a>`;
+                }
+            }
+
+            div.innerHTML = `
+                <div class="comment-meta">
+                    <span class="badge ${col.classBadge}"><i class="ph ph-calendar"></i> ${p.dataAtv}</span>
+                    <div>${actionBtns}</div>
+                </div>
+                <h4 style="margin: 10px 0; font-size: 0.95rem; font-weight: 600; line-height: 1.4; word-break: break-word;">${p.desc}</h4>
+                <div style="color: var(--text-muted); font-size: 0.8rem; border-top: 1px solid var(--border); padding-top: 8px; margin-top: 8px; display: flex; justify-content: space-between; align-items: center;">
+                    <span>Dmd: <strong>${p.demandante}</strong></span>
+                    ${urlBadge}
+                </div>
+            `;
+            itemsContainer.appendChild(div);
+        });
+        container.appendChild(colDiv);
+    });
+}
+
+// ====== EDIÇÃO DE TAREFAS AUDITORIA ======
+window.abrirModalEditAudiProj = function (firebaseId) {
+    // Busca em todos os membros
+    let p = null;
+    Object.values(audiProjetos).forEach(arr => {
+        const found = arr.find(x => x.firebaseId === firebaseId);
+        if (found) p = found;
+    });
+    if (!p) return;
+
+    document.getElementById('editAudiProjId').value = p.firebaseId;
+    document.getElementById('editAudiProjDesc').value = p.desc;
+    document.getElementById('editAudiProjDemand').value = p.demandante;
+    const [d, m, y] = p.dataAtv.split('/');
+    document.getElementById('editAudiProjDate').value = `${y}-${m}-${d}`;
+    document.getElementById('editAudiProjStatus').value = p.status;
+
+    const mbSelect = document.getElementById('editAudiProjMember');
+    mbSelect.innerHTML = audiEquipe.map(mb => `<option value="${mb.nome}">${mb.nome}</option>`).join('');
+    mbSelect.value = p.membroResponsavel;
+
+    document.getElementById('modalEditAudiProj').classList.add('show');
+}
+
+window.fecharModalEditAudiProj = function () {
+    document.getElementById('modalEditAudiProj').classList.remove('show');
+}
+
+window.confirmarEdicaoAudiProj = async function () {
+    const id = document.getElementById('editAudiProjId').value;
+    const desc = document.getElementById('editAudiProjDesc').value;
+    const dem = document.getElementById('editAudiProjDemand').value;
+    const dt = document.getElementById('editAudiProjDate').value;
+    const status = document.getElementById('editAudiProjStatus').value;
+    const newMember = document.getElementById('editAudiProjMember').value;
+
+    if (!desc || !dem || !dt || !newMember) return showToast("Preencha todos os campos da tarefa", "error");
+    const [y, m, d] = dt.split('-');
+
+    try {
+        await updateDoc(doc(db, "auditoria_projetos", id), {
+            desc, demandante: dem, dataAtv: `${d}/${m}/${y}`, status, membroResponsavel: newMember
+        });
+        window.fecharModalEditAudiProj();
+        showToast("Tarefa atualizada com sucesso!");
+    } catch (e) {
+        console.error(e);
+        showToast("Erro ao atualizar tarefa", "error");
+    }
+}
+
+// ====== EQUIPE AUDITORIA ======
+window.abrirModalAudiEquipe = function () {
+    document.getElementById('modalAudiEquipe').classList.add('show');
+}
+
+window.fecharModalAudiEquipe = function () {
+    document.getElementById('modalAudiEquipe').classList.remove('show');
+}
+
+window.adicionarAudiMembro = async function () {
+    const nome = document.getElementById('novoAudiMembroNome').value.trim();
+    if (!nome) return showToast("Digite um nome", "error");
+    if (audiEquipe.find(m => m.nome.toLowerCase() === nome.toLowerCase())) {
+        return showToast("Membro já existe", "error");
+    }
+    try {
+        await addDoc(collection(db, "auditoria_equipe"), { nome });
+        document.getElementById('novoAudiMembroNome').value = '';
+        showToast("Membro adicionado!");
+    } catch (e) {
+        console.error(e);
+        showToast("Erro ao adicionar", "error");
+    }
+}
+
+window.removerAudiMembro = async function (idMembro, nomeMembro) {
+    if (!confirm(`Excluir ${nomeMembro} da equipe?`)) return;
+    try {
+        await deleteDoc(doc(db, "auditoria_equipe", idMembro));
+        if (audiCurrentMember === nomeMembro) audiCurrentMember = null;
+        showToast("Membro removido.");
+    } catch (e) {
+        console.error(e);
+        showToast("Erro ao remover", "error");
+    }
+}
+
+function renderizarListaAudiEquipeGerenciar() {
+    const container = document.getElementById('listaAudiEquipeGerenciar');
+    if (!container) return;
+    container.innerHTML = '';
+    audiEquipe.forEach(m => {
+        const div = document.createElement('div');
+        div.style = "display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid var(--border);";
+        div.innerHTML = `
+            <span>${m.nome}</span>
+            <button class="btn btn-danger" style="padding: 5px 10px;" onclick="window.removerAudiMembro('${m.firebaseId}', '${m.nome}')">
+                <i class="ph ph-trash"></i>
+            </button>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function escapeCSV(text) {
+    if (!text) return '';
+    const str = String(text);
+    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+        return '"' + str.replace(/"/g, '""') + '"';
+    }
+    return str;
+}
+
+window.exportarAudiProjetosCSV = function () {
+    let csvContent = "\uFEFFResponsavel,Data_Atividade,Status,Descricao,Demandante,Registrado_Por\n";
+    Object.keys(audiProjetos).forEach(membro => {
+        const projetos = audiProjetos[membro] || [];
+        projetos.forEach(p => {
+            const row = [
+                membro, p.dataAtv, p.status || 'Pendente',
+                p.desc || "", p.demandante || "", p.autor || ""
+            ].map(escapeCSV).join(",");
+            csvContent += row + "\n";
+        });
+    });
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const encodedUri = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `relatorio_auditoria_tarefas_${new Date().getTime()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast("Download de tarefas iniciado");
 }
 
 if (currentUser) initApp();
