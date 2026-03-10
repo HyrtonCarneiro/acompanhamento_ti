@@ -128,7 +128,7 @@ function popularSelectLojasExpansao() {
 
 window.switchView = function (view) {
     try {
-        const views = ['dashboard', 'obras', 'tarefas', 'metapwr'];
+        const views = ['dashboard', 'obras', 'tarefas', 'metapwr', 'gantt'];
         views.forEach(v => {
             const el = document.getElementById(`view-${v}`);
             if (el) el.style.display = 'none';
@@ -139,11 +139,15 @@ window.switchView = function (view) {
         const currView = document.getElementById(`view-${view}`);
         const currNav = document.getElementById(`nav-${view}`);
 
-        if (currView) currView.style.display = (view === 'obras' || view === 'tarefas') ? 'flex' : 'block';
+        if (currView) currView.style.display = (view === 'obras' || view === 'tarefas' || view === 'gantt') ? 'flex' : 'block';
         if (view === 'tarefas') {
             currView.style.flexDirection = 'column';
         }
         if (currNav) currNav.classList.add('active');
+
+        if (view === 'gantt') {
+            window.renderGantt();
+        }
 
         if (window.innerWidth <= 768) { window.toggleSidebar(); }
     } catch (e) {
@@ -171,6 +175,7 @@ async function carregarKanbanExpansao() {
             obrasCache.push({ id: docSnap.id, ...docSnap.data() });
         });
         window.filtrarKanban();
+        window.renderGantt();
         atualizarDashboard();
     } catch (error) {
         console.error("Erro ao carregar Obras: ", error);
@@ -634,11 +639,152 @@ window.excluirObra = async function () {
     if (confirm("Tem certeza que deseja excluir esta obra permanentemente?")) {
         try {
             await deleteDoc(doc(db, "obras_expansao", cardAbertoId));
-            showToast("Obra excluída.", "success");
+            showToast("Obra excluída", "success");
             window.fecharModalCardExpansao();
             carregarKanbanExpansao();
-        } catch (e) { console.error(e); }
+        } catch (e) {
+            console.error(e);
+            showToast("Erro ao excluir obra", "error");
+        }
     }
+}
+
+// ================= GANTT CHART ENGINE =====================
+window.renderGantt = function () {
+    const wrapper = document.getElementById('gantt-wrapper');
+    if (!wrapper) return;
+
+    // Filtrar obras que tem data fim ou status pendente
+    const obrasTimeline = obrasCache.filter(o => o.dataInicio || o.dataFim);
+
+    // Configuração de datas
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    // Vamos desenhar a timeline de 1 mês atrás até 3 meses na frente gerando de Hoje
+    const startDate = new Date(hoje);
+    startDate.setMonth(startDate.getMonth() - 1);
+    startDate.setDate(1); // dia 1 do mes passado
+
+    const endDate = new Date(hoje);
+    endDate.setMonth(endDate.getMonth() + 3);
+    endDate.setDate(0); // ultimo dia do mes daqui a 3 meses
+
+    const ONE_DAY = 1000 * 60 * 60 * 24;
+    const totalVisDays = Math.round((endDate - startDate) / ONE_DAY) + 1;
+    const DAY_WIDTH = 30; // 30px por dia
+
+    // MONTAR CABEÇALHOS (Meses e Dias)
+    let monthsHtml = '';
+    let daysHtml = '';
+
+    let currentHtmlDate = new Date(startDate);
+    let currentMonth = currentHtmlDate.getMonth();
+    let daysInMonth = 0;
+
+    const monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+
+    for (let i = 0; i < totalVisDays; i++) {
+        const d = new Date(startDate.getTime() + (i * ONE_DAY));
+        const dayOfWeek = d.getDay();
+        const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+
+        daysHtml += `<div class="gantt-day ${isWeekend ? 'weekend' : ''}">${d.getDate()}</div>`;
+        daysInMonth++;
+
+        const nextDay = new Date(d.getTime() + ONE_DAY);
+        if (nextDay.getMonth() !== currentMonth || i === totalVisDays - 1) {
+            monthsHtml += `<div class="gantt-month" style="min-width: ${daysInMonth * DAY_WIDTH}px">${monthNames[currentMonth]} ${d.getFullYear()}</div>`;
+            currentMonth = nextDay.getMonth();
+            daysInMonth = 0;
+        }
+    }
+
+    // MONTAR LINHAS DE OBRAS
+    let rowsHtml = '';
+
+    // Ordenar por loja
+    const obrasOrd = [...obrasTimeline].sort((a, b) => (a.loja || '').localeCompare(b.loja || ''));
+
+    obrasOrd.forEach(obra => {
+        let dInicio = obra.dataInicio ? new Date(obra.dataInicio) : null;
+        let dFim = obra.dataFim ? new Date(obra.dataFim) : null;
+
+        if (dInicio) dInicio.setHours(0, 0, 0, 0);
+        else dInicio = dFim ? new Date(dFim.getTime() - (7 * ONE_DAY)) : null; // Se nao tem inicio, assume 7 dias antes do fim
+
+        if (dFim) dFim.setHours(0, 0, 0, 0);
+        else dFim = dInicio ? new Date(dInicio.getTime() + (7 * ONE_DAY)) : null;
+
+        if (!dInicio || !dFim) return; // Se mesmo assim for null
+
+        // Calcular posição X e Largura
+        const startOffsetDays = Math.round((dInicio - startDate) / ONE_DAY);
+        const durationDays = Math.round((dFim - dInicio) / ONE_DAY) + 1; // +1 para incluir o proprio dia
+
+        const leftPx = startOffsetDays * DAY_WIDTH;
+        const widthPx = durationDays * DAY_WIDTH;
+
+        // Logica de cor
+        const isCompleted = obra.status === 'concluido';
+        const isDelayed = !isCompleted && dFim < hoje;
+        let barClass = '';
+        if (isCompleted) barClass = 'completed';
+        else if (isDelayed) barClass = 'delayed';
+
+        // Formatar Nome da fase para ficar bonitinho
+        const mapFases = { 'backlog': 'Triagem', 'planejamento': 'Pré-Obra', 'fase1': 'Mobilização', 'fase2': 'Instalações', 'fase3': 'Acabamento', 'concluido': 'Concluído' };
+        const faseNome = mapFases[obra.status] || obra.status;
+
+        rowsHtml += `
+            <div class="gantt-row">
+                <div class="gantt-label">
+                    <h4 title="${obra.titulo}">${obra.titulo}</h4>
+                    <span>${obra.loja} • ${faseNome}</span>
+                </div>
+                <!-- Area Timeline da Linha -->
+                <div class="gantt-timeline" style="width: ${totalVisDays * DAY_WIDTH}px; min-width: ${totalVisDays * DAY_WIDTH}px">
+                    <div class="gantt-bar ${barClass}" 
+                         style="left: ${leftPx}px; width: ${widthPx}px" 
+                         title="${obra.titulo}\nInício: ${obra.dataInicio}\nFim: ${obra.dataFim}\nStatus: ${faseNome}" 
+                         onclick="window.abrirModalCardExpansao('${obra.id}')">
+                        ${obra.titulo}
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    // Posicionar Linha do Dia de Hoje
+    const hojeOffsetDays = Math.round((hoje - startDate) / ONE_DAY);
+    const hojeLinePx = hojeOffsetDays * DAY_WIDTH + (DAY_WIDTH / 2); // Meio do dia
+
+    wrapper.innerHTML = `
+        <div class="gantt-header-row">
+            <div class="gantt-label" style="background:var(--bg-color); border-bottom: none; z-index:11;"></div>
+            <div style="display:flex; flex-direction:column; overflow:hidden;">
+                <div style="display:flex;">${monthsHtml}</div>
+                <div class="gantt-days-row" style="width: ${totalVisDays * DAY_WIDTH}px;">
+                    ${daysHtml}
+                </div>
+            </div>
+        </div>
+        <div class="gantt-body">
+            <div style="position: relative; min-width: ${(totalVisDays * DAY_WIDTH) + 250}px">
+                ${rowsHtml}
+                <div class="gantt-today-line" style="left: ${hojeLinePx + 250}px;" title="Hoje"></div>
+            </div>
+        </div>
+    `;
+
+    // Scrollar automaticamente para a linha de Hoje (menos uns pixels pra ver o passado)
+    setTimeout(() => {
+        const body = wrapper.querySelector('.gantt-body');
+        if (body && hojeOffsetDays > 0) {
+            // Rola X mantendo uns 10 dias do passado a mostra
+            body.scrollLeft = Math.max(0, (hojeOffsetDays - 10) * DAY_WIDTH);
+        }
+    }, 100);
 }
 
 function renderChecklists() {
