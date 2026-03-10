@@ -62,14 +62,65 @@
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <button class="btn-menu-toggle" onclick="window.toggleSidebar()"><i
                                 class="ph ph-list"></i></button>
-                        <h1 class="page-title">Dashboard</h1>
+                        <h1 class="page-title">Dashboard de Auditoria</h1>
                     </div>
                 </div>
-                <div style="padding: 40px; text-align: center; margin-top: 50px;">
-                    <i class="ph ph-code" style="font-size: 4rem; color: var(--primary); margin-bottom: 20px;"></i>
-                    <h2>Área em Desenvolvimento</h2>
-                    <p style="color: var(--text-muted); max-width: 500px; margin: 10px auto;">Os indicadores e gráficos
-                        do Dashboard de Auditoria estarão disponíveis em breve nesta seção.</p>
+
+                <!-- KPIs -->
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                    <div
+                        style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                        <div
+                            style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
+                            Total Auditorias</div>
+                        <div id="kpiTotalAuditorias"
+                            style="font-size: 2rem; font-weight: 700; color: var(--primary); margin-top: 6px;">0</div>
+                    </div>
+                    <div
+                        style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                        <div
+                            style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
+                            Média da Rede</div>
+                        <div id="kpiMediaRede"
+                            style="font-size: 2rem; font-weight: 700; color: var(--sp-pistache); margin-top: 6px;">-
+                        </div>
+                    </div>
+                    <div
+                        style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                        <div
+                            style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
+                            Menor Nota</div>
+                        <div id="kpiMenorNota"
+                            style="font-size: 2rem; font-weight: 700; color: var(--sp-red); margin-top: 6px;">-</div>
+                        <div id="kpiMenorNotaLoja"
+                            style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;"></div>
+                    </div>
+                    <div
+                        style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                        <div
+                            style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
+                            Auditorias (Mês)</div>
+                        <div id="kpiAuditoriaMes"
+                            style="font-size: 2rem; font-weight: 700; color: var(--secondary); margin-top: 6px;">0</div>
+                    </div>
+                </div>
+
+                <!-- Gráficos -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px;">
+                    <div
+                        style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                        <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 1rem; color: var(--text-main);"><i
+                                class="ph ph-chart-bar" style="color: var(--primary);"></i> Média por Regional</h3>
+                        <div style="min-height: 300px;"><canvas id="chartMediaRegional"></canvas></div>
+                    </div>
+                    <div
+                        style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                        <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 1rem; color: var(--text-main);"><i
+                                class="ph ph-ranking" style="color: var(--sp-laranja);"></i> Ranking Últimas Notas por
+                            Loja</h3>
+                        <div style="min-height: 300px;"><canvas id="chartRankingLojas"></canvas></div>
+                    </div>
                 </div>
             </div>
 
@@ -181,21 +232,24 @@
                             <thead>
                                 <tr
                                     style="background: rgba(38, 93, 124, 0.05); border-bottom: 2px solid var(--border);">
-                                    <th
-                                        style="padding: 15px; font-weight: 600; font-size: 0.85rem; color: var(--text-muted);">
-                                        Loja / Matriz</th>
-                                    <th
-                                        style="padding: 15px; font-weight: 600; font-size: 0.85rem; color: var(--text-muted);">
-                                        Regional</th>
-                                    <th
-                                        style="padding: 15px; font-weight: 600; font-size: 0.85rem; color: var(--text-muted);">
-                                        Última Auditoria</th>
-                                    <th
-                                        style="padding: 15px; font-weight: 600; font-size: 0.85rem; color: var(--text-muted);">
-                                        Próxima Prevista</th>
-                                    <th
-                                        style="padding: 15px; font-weight: 600; font-size: 0.85rem; color: var(--text-muted);">
-                                        Auditor / Responsável</th>
+                                    <th onclick="window.sortPlanejamento('loja')"
+                                        style="padding: 15px; font-weight: 600; font-size: 0.85rem; color: var(--text-muted); cursor: pointer; user-select: none;">
+                                        Loja / Matriz <i class="ph ph-caret-up-down" style="font-size:0.7rem;"></i></th>
+                                    <th onclick="window.sortPlanejamento('regional')"
+                                        style="padding: 15px; font-weight: 600; font-size: 0.85rem; color: var(--text-muted); cursor: pointer; user-select: none;">
+                                        Regional <i class="ph ph-caret-up-down" style="font-size:0.7rem;"></i></th>
+                                    <th onclick="window.sortPlanejamento('ultima')"
+                                        style="padding: 15px; font-weight: 600; font-size: 0.85rem; color: var(--text-muted); cursor: pointer; user-select: none;">
+                                        Última Auditoria <i class="ph ph-caret-up-down" style="font-size:0.7rem;"></i>
+                                    </th>
+                                    <th onclick="window.sortPlanejamento('proxima')"
+                                        style="padding: 15px; font-weight: 600; font-size: 0.85rem; color: var(--text-muted); cursor: pointer; user-select: none;">
+                                        Próxima Prevista <i class="ph ph-caret-up-down" style="font-size:0.7rem;"></i>
+                                    </th>
+                                    <th onclick="window.sortPlanejamento('auditor')"
+                                        style="padding: 15px; font-weight: 600; font-size: 0.85rem; color: var(--text-muted); cursor: pointer; user-select: none;">
+                                        Auditor / Responsável <i class="ph ph-caret-up-down"
+                                            style="font-size:0.7rem;"></i></th>
                                     <th
                                         style="padding: 15px; font-weight: 600; font-size: 0.85rem; color: var(--text-muted); text-align: center;">
                                         Ações</th>

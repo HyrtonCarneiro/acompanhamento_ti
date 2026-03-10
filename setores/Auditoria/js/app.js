@@ -9,6 +9,10 @@ let scatterChartInst = null;
 let notasCache = [];
 let planejamentoCache = [];
 let planejamentoAbertoId = null;
+let planejamentoSortCol = 'loja';
+let planejamentoSortAsc = true;
+let chartMediaRegionalInst = null;
+let chartRankingLojasInst = null;
 
 window.toggleDarkMode = function () {
     document.body.classList.toggle('dark-mode');
@@ -48,12 +52,28 @@ function initApp() {
 
     document.getElementById('loggedUserName').innerText = currentUser;
 
-    // Popular Lojas no Select de Auditoria Online
+    // Popular Lojas no Select de Auditoria Online — Agrupado por Regional em ordem alfabética
     const selectLoja = document.getElementById('audiSelectLoja');
     if (selectLoja) {
         selectLoja.innerHTML = '<option value="">Selecione a Loja...</option>';
+        // Agrupar por estado (regional)
+        const porEstado = {};
         lojasIniciais.forEach(loja => {
-            selectLoja.innerHTML += `<option value="${loja.nome}">${loja.nome}</option>`;
+            if (!porEstado[loja.estado]) porEstado[loja.estado] = [];
+            porEstado[loja.estado].push(loja.nome);
+        });
+        // Ordenar as regionais e os nomes dentro de cada uma
+        const estadosOrdenados = Object.keys(porEstado).sort();
+        estadosOrdenados.forEach(estado => {
+            const optgroup = document.createElement('optgroup');
+            optgroup.label = `Regional ${estado}`;
+            porEstado[estado].sort().forEach(nome => {
+                const opt = document.createElement('option');
+                opt.value = nome;
+                opt.textContent = nome;
+                optgroup.appendChild(opt);
+            });
+            selectLoja.appendChild(optgroup);
         });
     }
 
@@ -77,7 +97,7 @@ function initApp() {
         document.getElementById('audiDataInput').valueAsDate = new Date();
     }
 
-    window.switchView('auditoriaOnline');
+    window.switchView('dashboard');
 }
 
 window.switchView = function (view) {
@@ -219,7 +239,8 @@ function iniciarListenersAuditoria() {
                 notasCache.push({ id: doc.id, ...doc.data() });
             });
             renderizarHistoricoNotas();
-            renderizarTabelaPlanejamento(); // Notas podem afetar a 'Última Auditoria'
+            renderizarTabelaPlanejamento();
+            renderDashboard(); // Atualizar Dashboard
         }, (err) => console.error("Erro Notas:", err));
 
         // Listener de Planejamento 
@@ -304,7 +325,18 @@ function renderizarHistoricoNotas() {
 }
 
 
-// 2. PLANEJAMENTO DE AUDITORIAS (TABELA)
+// 2. PLANEJAMENTO DE AUDITORIAS (TABELA COM SORT)
+function getLojaRegional(nomeLoja) {
+    const l = lojasIniciais.find(x => x.nome === nomeLoja);
+    return l ? l.estado : 'N/A';
+}
+
+function getUltimaAuditoria(nomeLoja) {
+    const historicoLoja = notasCache.filter(n => n.loja === nomeLoja);
+    if (historicoLoja.length > 0) return historicoLoja[0].data; // Já vem em desc
+    return null;
+}
+
 window.renderizarTabelaPlanejamento = function () {
     const tbody = document.getElementById('planejamentoTableBody');
     if (!tbody) return;
@@ -312,50 +344,72 @@ window.renderizarTabelaPlanejamento = function () {
 
     const filtro = (document.getElementById('pesquisaPlanejamento')?.value || '').toLowerCase();
 
-    // Cruzar Lojas Base com as Configurações Salvas no Firestore (planejamentoCache)
-    // E capturar a última Data em notasCache para exibir.
-
-    lojasIniciais.forEach(lojaBase => {
-        // Ignorar a Matriz ou exibir, como preferir. Incluiremos.
-
-        // Busca Configuração do Planejamento (usamos campo loja)
+    // Preparar array enriquecido
+    let rows = lojasIniciais.map(lojaBase => {
         const cfg = planejamentoCache.find(p => p.loja === lojaBase.nome) || {};
+        const ultimaRaw = getUltimaAuditoria(lojaBase.nome);
+        return {
+            nome: lojaBase.nome,
+            regional: getLojaRegional(lojaBase.nome),
+            ultimaRaw: ultimaRaw || '',
+            proximaRaw: cfg.dataProxima || '',
+            auditor: cfg.auditor || '',
+            docId: cfg.docId || null
+        };
+    });
 
-        // Busca a Nota mais recente para esta loja
-        const historicoLoja = notasCache.filter(n => n.loja === lojaBase.nome);
-        let ultimaAuditoriaStr = "Nunca";
-        if (historicoLoja.length > 0) {
-            // Como já vem ordenado desc de lá, index 0 é o mais recente
-            const ulData = historicoLoja[0].data;
-            const [y, m, d] = ulData.split('-');
-            ultimaAuditoriaStr = `${d}/${m}/${y}`;
+    // Filtro de texto
+    if (filtro) {
+        rows = rows.filter(r => r.nome.toLowerCase().includes(filtro) || r.regional.toLowerCase().includes(filtro) || r.auditor.toLowerCase().includes(filtro));
+    }
+
+    // Sorting
+    rows.sort((a, b) => {
+        let va, vb;
+        switch (planejamentoSortCol) {
+            case 'loja': va = a.nome; vb = b.nome; break;
+            case 'regional': va = a.regional; vb = b.regional; break;
+            case 'ultima': va = a.ultimaRaw; vb = b.ultimaRaw; break;
+            case 'proxima': va = a.proximaRaw; vb = b.proximaRaw; break;
+            case 'auditor': va = a.auditor; vb = b.auditor; break;
+            default: va = a.nome; vb = b.nome;
         }
+        if (va < vb) return planejamentoSortAsc ? -1 : 1;
+        if (va > vb) return planejamentoSortAsc ? 1 : -1;
+        return 0;
+    });
 
-        // Filtro de Texto
-        if (filtro && !lojaBase.nome.toLowerCase().includes(filtro) && !(cfg.regional || '').toLowerCase().includes(filtro)) {
-            return;
-        }
-
-        const dataProxStr = cfg.dataProxima ? cfg.dataProxima.split('-').reverse().join('/') : '<span style="color:var(--text-muted)">Não agendado</span>';
-        const auditor = cfg.auditor || '<span style="color:var(--text-muted)">A Definir</span>';
-        const regional = cfg.regional || 'N/A';
+    rows.forEach(r => {
+        const ultimaStr = r.ultimaRaw ? r.ultimaRaw.split('-').reverse().join('/') : 'Nunca';
+        const proxStr = r.proximaRaw ? r.proximaRaw.split('-').reverse().join('/') : '<span style="color:var(--text-muted)">Não agendado</span>';
+        const audStr = r.auditor || '<span style="color:var(--text-muted)">A Definir</span>';
 
         const tr = document.createElement('tr');
         tr.style.borderBottom = "1px solid var(--border)";
         tr.innerHTML = `
-            <td style="padding: 15px; font-weight: 600; font-size: 0.9rem; color: var(--text-main);">${lojaBase.nome}</td>
-            <td style="padding: 15px; font-size: 0.85rem; color: var(--secondary);"><span style="background: rgba(38,93,124,0.1); padding: 4px 8px; border-radius: 4px;">${regional}</span></td>
-            <td style="padding: 15px; font-size: 0.85rem; font-weight: 500;">${ultimaAuditoriaStr}</td>
-            <td style="padding: 15px; font-size: 0.85rem; font-weight: 600;">${dataProxStr}</td>
-            <td style="padding: 15px; font-size: 0.85rem; color: var(--text-main);"><i class="ph ph-user"></i> ${auditor}</td>
+            <td style="padding: 15px; font-weight: 600; font-size: 0.9rem; color: var(--text-main);">${r.nome}</td>
+            <td style="padding: 15px; font-size: 0.85rem; color: var(--secondary);"><span style="background: rgba(38,93,124,0.1); padding: 4px 8px; border-radius: 4px;">${r.regional}</span></td>
+            <td style="padding: 15px; font-size: 0.85rem; font-weight: 500;">${ultimaStr}</td>
+            <td style="padding: 15px; font-size: 0.85rem; font-weight: 600;">${proxStr}</td>
+            <td style="padding: 15px; font-size: 0.85rem; color: var(--text-main);"><i class="ph ph-user"></i> ${audStr}</td>
             <td style="padding: 15px; text-align: center;">
-                <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem;" onclick="window.abrirModalEditPlanejamento('${lojaBase.nome}')">
-                    <i class="ph ph-pencil-simple"></i> Editar Agendamento
+                <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem;" onclick="window.abrirModalEditPlanejamento('${r.nome}')">
+                    <i class="ph ph-pencil-simple"></i> Editar
                 </button>
             </td>
         `;
         tbody.appendChild(tr);
     });
+}
+
+window.sortPlanejamento = function (col) {
+    if (planejamentoSortCol === col) {
+        planejamentoSortAsc = !planejamentoSortAsc; // Toggle
+    } else {
+        planejamentoSortCol = col;
+        planejamentoSortAsc = true;
+    }
+    renderizarTabelaPlanejamento();
 }
 
 window.filtrarPlanejamento = function () {
@@ -417,6 +471,112 @@ window.salvarPlanejamento = async function () {
     } catch (e) {
         console.error(e);
         showToast("Erro ao salvar planejamento", "error");
+    }
+}
+
+// ============================================
+// 3. DASHBOARD DINÂMICO
+// ============================================
+function renderDashboard() {
+    if (notasCache.length === 0) {
+        if (document.getElementById('kpiTotalAuditorias')) document.getElementById('kpiTotalAuditorias').textContent = '0';
+        if (document.getElementById('kpiMediaRede')) document.getElementById('kpiMediaRede').textContent = '-';
+        if (document.getElementById('kpiMenorNota')) document.getElementById('kpiMenorNota').textContent = '-';
+        if (document.getElementById('kpiMenorNotaLoja')) document.getElementById('kpiMenorNotaLoja').textContent = '';
+        if (document.getElementById('kpiAuditoriaMes')) document.getElementById('kpiAuditoriaMes').textContent = '0';
+        return;
+    }
+
+    // KPI: Total de Auditorias
+    document.getElementById('kpiTotalAuditorias').textContent = notasCache.length;
+
+    // KPI: Média da Rede
+    const somaNotas = notasCache.reduce((acc, n) => acc + n.nota, 0);
+    const media = somaNotas / notasCache.length;
+    const elMedia = document.getElementById('kpiMediaRede');
+    elMedia.textContent = media.toFixed(1);
+    elMedia.style.color = media >= 8.5 ? 'var(--sp-pistache)' : (media >= 7 ? 'var(--sp-laranja)' : 'var(--sp-red)');
+
+    // KPI: Menor Nota (da última auditoria de cada loja)
+    // Pegar a nota mais recente de cada loja
+    const ultimaPorLoja = {};
+    notasCache.forEach(n => {
+        if (!ultimaPorLoja[n.loja] || n.data > ultimaPorLoja[n.loja].data) {
+            ultimaPorLoja[n.loja] = n;
+        }
+    });
+    const todasUltimas = Object.values(ultimaPorLoja);
+    const menor = todasUltimas.reduce((min, n) => n.nota < min.nota ? n : min, todasUltimas[0]);
+    document.getElementById('kpiMenorNota').textContent = menor.nota.toFixed(1);
+    document.getElementById('kpiMenorNotaLoja').textContent = menor.loja;
+
+    // KPI: Auditorias neste mês
+    const hoje = new Date();
+    const mesAtual = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`;
+    const doMes = notasCache.filter(n => n.data && n.data.startsWith(mesAtual));
+    document.getElementById('kpiAuditoriaMes').textContent = doMes.length;
+
+    // ---- GRÁFICO 1: Média por Regional ----
+    const mediaPorRegional = {};
+    const countPorRegional = {};
+    todasUltimas.forEach(n => {
+        const reg = getLojaRegional(n.loja);
+        if (!mediaPorRegional[reg]) { mediaPorRegional[reg] = 0; countPorRegional[reg] = 0; }
+        mediaPorRegional[reg] += n.nota;
+        countPorRegional[reg]++;
+    });
+    const regionais = Object.keys(mediaPorRegional).sort();
+    const mediasRegionais = regionais.map(r => +(mediaPorRegional[r] / countPorRegional[r]).toFixed(1));
+    const coresBarras = mediasRegionais.map(m => m >= 8.5 ? '#4F7039' : (m >= 7 ? '#DA5513' : '#DA0D17'));
+
+    const isDark = document.body.classList.contains('dark-mode');
+    const textColor = isDark ? '#f8fafc' : '#0f172a';
+    const gridColor = isDark ? '#334155' : '#e2e8f0';
+
+    const canvasRegional = document.getElementById('chartMediaRegional');
+    if (canvasRegional) {
+        if (chartMediaRegionalInst) chartMediaRegionalInst.destroy();
+        chartMediaRegionalInst = new Chart(canvasRegional, {
+            type: 'bar',
+            data: {
+                labels: regionais,
+                datasets: [{ label: 'Média', data: mediasRegionais, backgroundColor: coresBarras, borderRadius: 6, barThickness: 30 }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { min: 0, max: 10, grid: { color: gridColor }, ticks: { color: textColor } },
+                    y: { grid: { display: false }, ticks: { color: textColor, font: { weight: '600' } } }
+                }
+            }
+        });
+    }
+
+    // ---- GRÁFICO 2: Ranking das últimas notas por loja (horizontal bar, top 15) ----
+    const ranking = [...todasUltimas].sort((a, b) => a.nota - b.nota).slice(0, 15);
+    const labelsRanking = ranking.map(n => n.loja);
+    const valoresRanking = ranking.map(n => n.nota);
+    const coresRanking = valoresRanking.map(v => v >= 8.5 ? '#4F7039' : (v >= 7 ? '#DA5513' : '#DA0D17'));
+
+    const canvasRanking = document.getElementById('chartRankingLojas');
+    if (canvasRanking) {
+        if (chartRankingLojasInst) chartRankingLojasInst.destroy();
+        chartRankingLojasInst = new Chart(canvasRanking, {
+            type: 'bar',
+            data: {
+                labels: labelsRanking,
+                datasets: [{ label: 'Nota', data: valoresRanking, backgroundColor: coresRanking, borderRadius: 6, barThickness: 18 }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { min: 0, max: 10, grid: { color: gridColor }, ticks: { color: textColor } },
+                    y: { grid: { display: false }, ticks: { color: textColor, font: { size: 11 } } }
+                }
+            }
+        });
     }
 }
 
