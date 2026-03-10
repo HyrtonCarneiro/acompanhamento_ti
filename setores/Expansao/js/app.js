@@ -509,10 +509,6 @@ window.abrirModalCardExpansao = function (id = null) {
         document.getElementById('modalCardNovaLojaInput').value = '';
         document.getElementById('modalCardStatus').value = 'backlog';
 
-        // Resetar visibilidade da loja (Retrofit é default)
-        document.getElementById('containerLojaExistente').style.display = 'block';
-        document.getElementById('containerNovaLoja').style.display = 'none';
-
         if (document.querySelector('input[name="modalTagExp"][value="Retrofit"]')) {
             document.querySelector('input[name="modalTagExp"][value="Retrofit"]').checked = true;
         }
@@ -545,15 +541,8 @@ window.abrirModalCardExpansao = function (id = null) {
                 document.getElementById('displayCardId').textContent = obra.id.substring(0, 8).toUpperCase();
                 document.getElementById('displayCardCriador').textContent = obra.autor || 'Sistema';
 
-                if (obra.tag === 'Nova Loja') {
-                    document.getElementById('modalCardNovaLojaInput').value = obra.loja;
-                    document.getElementById('containerLojaExistente').style.display = 'none';
-                    document.getElementById('containerNovaLoja').style.display = 'block';
-                } else {
-                    document.getElementById('modalCardLoja').value = obra.loja;
-                    document.getElementById('containerLojaExistente').style.display = 'block';
-                    document.getElementById('containerNovaLoja').style.display = 'none';
-                }
+                if (document.getElementById('modalCardTituloInput')) document.getElementById('modalCardTituloInput').value = obra.titulo;
+                document.getElementById('modalCardLoja').value = obra.loja;
 
                 document.getElementById('modalCardStatus').value = obra.status;
 
@@ -591,19 +580,30 @@ window.salvarCardExpansao = async function () {
     try {
         const id = document.getElementById('modalCardId').value;
         const tituloEl = document.getElementById('modalCardTituloInput');
-        const isNovaLoja = tag === 'Nova Loja';
-        const loja = isNovaLoja ? document.getElementById('modalCardNovaLojaInput').value : document.getElementById('modalCardLoja').value;
-        const status = document.getElementById('modalCardStatus').value;
+        const lojaEl = document.getElementById('modalCardLoja');
+        const statusEl = document.getElementById('modalCardStatus');
         const radioSelected = document.querySelector('input[name="modalTagExp"]:checked');
+
+        if (!tituloEl || !lojaEl || !statusEl) {
+            throw new Error("Elementos básicos do modal não encontrados (HTML corrompido)");
+        }
+
+        const titulo = tituloEl.value.trim();
+        const loja = lojaEl.value;
+        const status = statusEl.value;
         const tag = radioSelected ? radioSelected.value : 'Retrofit';
 
-        const dataInicio = document.getElementById('modalDataInicio').value;
-        const dataFim = document.getElementById('modalDataFim').value;
-        const custoPrev = document.getElementById('modalCustoPrev').value;
-        const custoReal = document.getElementById('modalCustoReal').value;
+        const dataInicio = document.getElementById('modalDataInicio')?.value || '';
+        const dataFim = document.getElementById('modalDataFim')?.value || '';
+        const custoPrev = document.getElementById('modalCustoPrev')?.value || '';
+        const custoReal = document.getElementById('modalCustoReal')?.value || '';
 
-        if (!titulo || !loja) {
-            showToast("Preencha Título e Loja", "warning");
+        if (!titulo) {
+            showToast("O título da obra é obrigatório", "warning");
+            return;
+        }
+        if (!loja) {
+            showToast("Selecione uma loja para esta obra", "warning");
             return;
         }
 
