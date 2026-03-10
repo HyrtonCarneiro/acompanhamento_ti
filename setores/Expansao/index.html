@@ -60,7 +60,7 @@
             </div>
         </aside>
 
-        <main class="main-content">
+        <main class="main-content" style="min-width: 0; overflow-x: hidden;">
             <!-- 1. DASHBOARD -->
             <div id="view-dashboard" style="display: none;">
                 <div class="header-actions">
@@ -541,15 +541,15 @@
     </div>
 
     <!-- 3. CRONOGRAMA GANTT -->
-    <div id="view-gantt" style="display: none; height: 100%; flex-direction: column;">
-        <div class="header-actions" style="margin-bottom: 24px;">
+    <div id="view-gantt" style="display: none; height: 100%; flex-direction: column; min-width: 0;">
+        <div class="header-actions" style="margin-bottom: 24px; flex-shrink: 0;">
             <div style="display: flex; align-items: center; gap: 10px;">
                 <button class="btn-menu-toggle" onclick="window.toggleSidebar()"><i class="ph ph-list"></i></button>
                 <h1 class="page-title">Cronograma de Obras</h1>
             </div>
         </div>
         <div
-            style="margin-bottom: 15px; display: flex; gap: 15px; align-items: center; color: var(--text-muted); font-size: 0.85rem;">
+            style="margin-bottom: 15px; display: flex; gap: 15px; align-items: center; color: var(--text-muted); font-size: 0.85rem; flex-shrink: 0;">
             <span style="display: flex; align-items: center; gap: 5px;">
                 <div style="width: 12px; height: 12px; border-radius: 50%; background: var(--primary);"></div> No Prazo
             </span>
@@ -562,7 +562,7 @@
         </div>
         <!-- Container Base onde JS injetará o Gráfico -->
         <div id="gantt-wrapper"
-            style="flex: 1; overflow: hidden; background: var(--surface); border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column;">
+            style="flex: 1; overflow: hidden; background: var(--surface); border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; min-width: 0; max-width: 100%;">
             <!-- JS preenche aqui -->
         </div>
     </div>
