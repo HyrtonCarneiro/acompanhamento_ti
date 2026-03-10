@@ -30,8 +30,8 @@ function initApp() {
 
     document.getElementById('loggedUserName').innerText = currentUser;
 
-    // Injetar Hub button
-    document.querySelectorAll('.header-actions').forEach(container => {
+    // Injetar Hub button (Correção do loop e seletores p evitar duplicidade DOM)
+    document.querySelectorAll('.header-actions > div:first-child').forEach(container => {
         if (container.querySelector('.btn-hub')) return;
         const btn = document.createElement('button');
         btn.className = 'btn btn-outline btn-hub';
@@ -39,27 +39,16 @@ function initApp() {
         btn.title = 'Voltar para o Hub de Setores';
         btn.innerHTML = '<i class="ph ph-squares-four" style="font-size: 1.2rem;"></i>';
         btn.onclick = () => window.location.href = '../../index.html?hub=1';
-
-        const titleSpan = container.querySelector('.page-title');
-        const divWrapper = document.createElement('div');
-        divWrapper.style.display = 'flex';
-        divWrapper.style.alignItems = 'center';
-        divWrapper.style.gap = '10px';
-
-        container.insertBefore(divWrapper, titleSpan);
-        divWrapper.appendChild(btn);
-        divWrapper.appendChild(titleSpan);
-
-        const mobileBtn = document.querySelector('.btn-menu-toggle');
-        if (mobileBtn) { divWrapper.insertBefore(mobileBtn, btn); }
+        container.insertBefore(btn, container.querySelector('.page-title'));
     });
 
-    window.switchView('dashboard');
+    window.switchView('obras');
     carregarKanbanExpansao();
 }
 
+// Expansão agra conta com Obras, dashboard, tarefas, metapwr
 window.switchView = function (view) {
-    const views = ['dashboard', 'tarefas', 'metapwr'];
+    const views = ['dashboard', 'obras', 'tarefas', 'metapwr'];
     views.forEach(v => {
         const el = document.getElementById('view-' + v);
         const nav = document.getElementById('nav-' + v);
@@ -70,8 +59,13 @@ window.switchView = function (view) {
     const currView = document.getElementById(`view-${view}`);
     const currNav = document.getElementById(`nav-${view}`);
 
-    if (currView) currView.style.display = 'block';
+    if (currView) currView.style.display = 'flex'; // ou block
     if (currNav) currNav.classList.add('active');
+
+    // O View obras utiliza flexbox column no full height
+    if (view !== 'obras' && currView) {
+        currView.style.display = 'block';
+    }
 
     if (window.innerWidth <= 768) { window.toggleSidebar(); }
 }
@@ -97,7 +91,6 @@ async function carregarKanbanExpansao() {
         window.filtrarKanban();
     } catch (error) {
         console.error("Erro ao carregar Obras: ", error);
-        window.showToast("Erro ao carregar Kanban", "error");
     }
 }
 
@@ -115,7 +108,6 @@ function renderKanban(obras) {
         const colContainer = document.querySelector(`#col-${obra.status} .kanban-cards`);
         if (colContainer) {
 
-            // Logica de atraso e checklist
             let dataFim = new Date(obra.dataFim);
             let hoje = new Date();
             let hasDate = obra.dataFim && obra.dataFim !== "";
@@ -125,8 +117,6 @@ function renderKanban(obras) {
             let concluidosChecks = (obra.checklists || []).filter(c => c.checked).length;
             let checkPerc = totalChecks > 0 ? Math.round((concluidosChecks / totalChecks) * 100) : 0;
 
-            let totalCustos = obra.custoPrev ? `R$ ${obra.custoPrev}` : '--';
-
             let tagClasses = '';
             if (obra.tag === 'Urgente') tagClasses = 'tag-urgente';
             if (obra.tag === 'Expansão') tagClasses = 'tag-expansao';
@@ -134,7 +124,7 @@ function renderKanban(obras) {
             if (obra.tag === 'Estética') tagClasses = 'tag-estetica';
 
             const cardHtml = `
-                <div class="kanban-card-item ${isLate ? 'late' : ''}" draggable="true" ondragstart="drag(event)" id="card-${obra.id}" data-id="${obra.id}" onclick="window.abrirModalCardExpansao('${obra.id}')">
+                <div class="kanban-card-item ${isLate ? 'late' : ''}" draggable="true" ondragstart="window.drag(event)" id="card-${obra.id}" data-id="${obra.id}" onclick="window.abrirModalCardExpansao('${obra.id}')">
                     
                     <div class="tags-container">
                         ${obra.tag ? `<span class="tag ${tagClasses}">${obra.tag}</span>` : ''}
@@ -238,13 +228,12 @@ window.abrirModalCardExpansao = function (id = null) {
             document.getElementById('btnExcluirCardExpansao').style.display = 'inline-block';
         }
     } else {
-        // Se for NOVO job, pedir titulo
         setTimeout(() => {
             const novoTitulo = prompt("Digite o Título da nova Obra/Manutenção:");
             if (novoTitulo) {
                 document.getElementById('modalCardTitulo').innerText = novoTitulo;
             } else {
-                return; // cancelou
+                return;
             }
         }, 100);
     }
@@ -262,7 +251,8 @@ window.salvarCardExpansao = async function () {
     const titulo = document.getElementById('modalCardTitulo').innerText;
     const loja = document.getElementById('modalCardLoja').value;
     const status = document.getElementById('modalCardStatus').value;
-    const tag = document.querySelector('input[name="modalTagExp"]:checked').value;
+    const radioSelected = document.querySelector('input[name="modalTagExp"]:checked');
+    const tag = radioSelected ? radioSelected.value : 'Estética';
 
     const dataInicio = document.getElementById('modalDataInicio').value;
     const dataFim = document.getElementById('modalDataFim').value;
@@ -286,12 +276,11 @@ window.salvarCardExpansao = async function () {
             await updateDoc(doc(db, "obras_expansao", id), payload);
             window.showToast("Obra atualizada", "success");
         } else {
-            // Push primeira msg historico
             payload.comentarios = [{
                 texto: "Obra criada no sistema.", dataHora: new Date().toLocaleString('pt-BR'), autor: currentUser
             }];
             await addDoc(obrasCollection, payload);
-            window.showToast("Obra criada com sucesso", "success");
+            window.showToast("Obra criada", "success");
         }
         window.fecharModalCardExpansao();
         carregarKanbanExpansao();
@@ -303,7 +292,7 @@ window.salvarCardExpansao = async function () {
 
 window.excluirObra = async function () {
     if (!cardAbertoId) return;
-    if (confirm("Tem certeza que deseja excluir esta obra e todo seu histórico permanentemente?")) {
+    if (confirm("Tem certeza que deseja excluir esta obra permanentemente?")) {
         try {
             await deleteDoc(doc(db, "obras_expansao", cardAbertoId));
             window.showToast("Obra excluída.", "success");
@@ -313,7 +302,6 @@ window.excluirObra = async function () {
     }
 }
 
-// ==== CHECKLISTS ====
 function renderChecklists() {
     const cont = document.getElementById('modalChecklistItensContainer');
     cont.innerHTML = '';
@@ -354,14 +342,10 @@ window.removerChecklist = function (idx) {
     renderChecklists();
 }
 
-// ==== COMENTÁRIOS / DIÁRIO ====
 function renderComentarios() {
     const cont = document.getElementById('modalComentariosContainer');
     cont.innerHTML = '';
-
-    // Reverse para mais novo em cima
     const reversed = [...comentariosCache].reverse();
-
     reversed.forEach(c => {
         cont.insertAdjacentHTML('beforeend', `
             <div style="background: var(--surface); padding: 10px; border-radius: 6px; border-left: 3px solid var(--sp-laranja); font-size: 0.85rem;">
@@ -387,14 +371,13 @@ window.addComentarioCardExpansao = function () {
     }
 }
 
-// ==== ANEXOS ====
 function renderAnexos() {
     const cont = document.getElementById('modalAnexosContainer');
     cont.innerHTML = '';
     anexosCache.forEach((url, i) => {
         cont.insertAdjacentHTML('beforeend', `
             <li style="margin-bottom: 5px; display: flex; justify-content: space-between;">
-                <a href="${url}" target="_blank" style="color: var(--sp-aoleite); text-decoration: none;">Link Anexo ${i + 1}</a>
+                <a href="${url}" target="_blank" style="color: var(--sp-aoleite); text-decoration: none; word-wrap: break-word; max-width: 90%;">Anexo ${i + 1} - Acessar Link</a>
                 <i class="ph ph-trash" style="cursor: pointer; color: var(--danger);" onclick="window.removerAnexo(${i})"></i>
             </li>
         `);
@@ -413,7 +396,6 @@ window.removerAnexo = function (i) {
     renderAnexos();
 }
 
-// ================= DRAG AND DROP =====================
 window.allowDrop = function (ev) {
     ev.preventDefault();
 }
@@ -425,14 +407,10 @@ window.drag = function (ev) {
 window.drop = async function (ev) {
     ev.preventDefault();
     const dataId = ev.dataTransfer.getData("card_id");
-
-    // Find closest col container
     let targetCol = ev.target.closest('.kanban-col');
     if (!targetCol) return;
 
     let novaColId = targetCol.id.replace('col-', '');
-
-    // Valid columns guard
     const cols = ['backlog', 'planejamento', 'fase1', 'fase2', 'fase3', 'concluido'];
     if (!cols.includes(novaColId)) return;
 
@@ -447,21 +425,15 @@ window.drop = async function (ev) {
         obraRef.comentarios = coments;
         window.filtrarKanban();
 
-        // Update Backend
         try {
             await updateDoc(doc(db, "obras_expansao", dataId), {
                 status: novaColId,
                 comentarios: coments
             });
-        } catch (e) {
-            console.error("Falha ao mover", e);
-            window.showToast("Falha ao sincronizar drag-drop", "error");
-        }
+        } catch (e) { console.error(e); }
     }
 }
 
-
-// --- Toast Simples ---
 window.showToast = function (message, type = 'success') {
     if (typeof Toastify !== 'undefined') {
         Toastify({

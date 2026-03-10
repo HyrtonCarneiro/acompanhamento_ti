@@ -20,14 +20,19 @@
         <div id="sidebarOverlay" class="sidebar-overlay" onclick="window.toggleSidebar()"></div>
         <aside class="sidebar" id="appSidebar">
             <div class="brand">
-                <i class="ph-fill ph-chart-line-up"></i> San Paolo Expansão
+                <i class="ph-fill ph-map-pin-line"></i> San Paolo Expansão
             </div>
             <div class="nav-menu">
                 <div class="nav-item active" onclick="window.switchView('dashboard')" id="nav-dashboard">
                     <i class="ph ph-chart-pie-slice"></i> Dashboard
                 </div>
+                <!-- Nova Aba Exclusiva de Kanban Lojas/Obras -->
+                <div class="nav-item" onclick="window.switchView('obras')" id="nav-obras">
+                    <i class="ph ph-buildings"></i> Obras & Projetos
+                </div>
+                <!-- Tarefas Genéricas da Equipe mantida -->
                 <div class="nav-item" onclick="window.switchView('tarefas')" id="nav-tarefas">
-                    <i class="ph ph-kanban"></i> Tarefas da Equipe
+                    <i class="ph ph-list-checks"></i> Tarefas da Equipe
                 </div>
                 <div class="nav-item" onclick="window.switchView('metapwr')" id="nav-metapwr">
                     <i class="ph ph-target"></i> Meta PWR
@@ -42,7 +47,7 @@
                         <i class="ph ph-moon"></i> Tema Escuro
                     </button>
                     <button class="btn btn-outline" style="width: 100%; justify-content: center;"
-                        onclick="window.logout()">
+                        onclick="window.location.href = '../../index.html'">
                         <i class="ph ph-sign-out"></i> Voltar / Sair
                     </button>
                 </div>
@@ -50,6 +55,7 @@
         </aside>
 
         <main class="main-content">
+            <!-- 1. DASHBOARD -->
             <div id="view-dashboard">
                 <div class="header-actions">
                     <div style="display: flex; align-items: center; gap: 10px;">
@@ -59,33 +65,36 @@
                     </div>
                 </div>
                 <div style="padding: 40px; text-align: center; margin-top: 50px;">
-                    <i class="ph ph-code" style="font-size: 4rem; color: var(--primary); margin-bottom: 20px;"></i>
-                    <h2>Ãrea em Desenvolvimento</h2>
-                    <p style="color: var(--text-muted); max-width: 500px; margin: 10px auto;">Os indicadores e grÃ¡ficos
-                        do Dashboard de Expansão estarÃ£o disponÃ­veis em breve nesta seÃ§Ã£o.</p>
+                    <i class="ph ph-chart-line-up"
+                        style="font-size: 4rem; color: var(--primary); margin-bottom: 20px;"></i>
+                    <h2>Área em Desenvolvimento</h2>
+                    <p style="color: var(--text-muted); max-width: 500px; margin: 10px auto;">Os indicadores e gráficos
+                        do Dashboard de Expansão estarão disponíveis em breve nesta seção.</p>
                 </div>
             </div>
 
-            <div id="view-tarefas" style="display: none; height: 100%; display: flex; flex-direction: column;">
+            <!-- 2. OBRAS & PROJETOS KANBAN -->
+            <div id="view-obras" style="display: none; height: 100%; display: flex; flex-direction: column;">
                 <div class="header-actions">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <button class="btn-menu-toggle" onclick="window.toggleSidebar()"><i
                                 class="ph ph-list"></i></button>
-                        <h1 class="page-title">Gestão de Obras & Projetos</h1>
+                        <h1 class="page-title">Painel de Obras & Manutenções</h1>
                     </div>
                     <button class="btn btn-primary" onclick="window.abrirModalCardExpansao()"><i class="ph ph-plus"></i>
                         Novo Job / Obra</button>
                 </div>
 
                 <!-- Toolbar Filtros -->
-                <div class="toolbar" style="margin-bottom: 20px;">
+                <div class="toolbar" style="margin-bottom: 20px; display: flex; gap: 15px;">
                     <div class="search-wrapper" style="flex: 2;">
                         <i class="ph ph-magnifying-glass"></i>
-                        <input type="text" id="filtroKanbanBusca" placeholder="Pesquisar por Título da obra..."
+                        <input type="text" id="filtroKanbanBusca" placeholder="Pesquisar por Título ou Loja..."
                             oninput="window.filtrarKanban()">
                     </div>
                     <div style="flex: 1; min-width: 200px;">
-                        <select id="filtroKanbanTag" onchange="window.filtrarKanban()">
+                        <select id="filtroKanbanTag" onchange="window.filtrarKanban()"
+                            style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border);">
                             <option value="">Todas as Tags</option>
                             <option value="Urgente">Urgente</option>
                             <option value="Expansão">Nova Loja / Expansão</option>
@@ -103,7 +112,7 @@
                             <h3>Backlog & Standby</h3>
                             <span class="kanban-col-count" id="count-backlog">0</span>
                         </div>
-                        <div class="kanban-cards" ondrop="drop(event)" ondragover="allowDrop(event)">
+                        <div class="kanban-cards" ondrop="window.drop(event)" ondragover="window.allowDrop(event)">
                             <!-- Cards injetados via JS -->
                         </div>
                     </div>
@@ -114,7 +123,8 @@
                             <h3>Planej. / Projetos</h3>
                             <span class="kanban-col-count" id="count-planejamento">0</span>
                         </div>
-                        <div class="kanban-cards" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                        <div class="kanban-cards" ondrop="window.drop(event)" ondragover="window.allowDrop(event)">
+                        </div>
                     </div>
 
                     <!-- Coluna 3: Fase 1 -->
@@ -123,7 +133,8 @@
                             <h3>Fase 1 (Mobilização)</h3>
                             <span class="kanban-col-count" id="count-fase1">0</span>
                         </div>
-                        <div class="kanban-cards" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                        <div class="kanban-cards" ondrop="window.drop(event)" ondragover="window.allowDrop(event)">
+                        </div>
                     </div>
 
                     <!-- Coluna 4: Fase 2 -->
@@ -132,7 +143,8 @@
                             <h3>Fase 2 (Instalações)</h3>
                             <span class="kanban-col-count" id="count-fase2">0</span>
                         </div>
-                        <div class="kanban-cards" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                        <div class="kanban-cards" ondrop="window.drop(event)" ondragover="window.allowDrop(event)">
+                        </div>
                     </div>
 
                     <!-- Coluna 5: Fase 3 -->
@@ -141,7 +153,8 @@
                             <h3>Fase 3 (Revestimento)</h3>
                             <span class="kanban-col-count" id="count-fase3">0</span>
                         </div>
-                        <div class="kanban-cards" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                        <div class="kanban-cards" ondrop="window.drop(event)" ondragover="window.allowDrop(event)">
+                        </div>
                     </div>
 
                     <!-- Coluna 6: Concluído -->
@@ -150,11 +163,31 @@
                             <h3>Entregue / Concluído</h3>
                             <span class="kanban-col-count" id="count-concluido">0</span>
                         </div>
-                        <div class="kanban-cards" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                        <div class="kanban-cards" ondrop="window.drop(event)" ondragover="window.allowDrop(event)">
+                        </div>
                     </div>
                 </div>
             </div>
 
+            <!-- 3. TAREFAS GENERICAS -->
+            <div id="view-tarefas" style="display: none;">
+                <div class="header-actions">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <button class="btn-menu-toggle" onclick="window.toggleSidebar()"><i
+                                class="ph ph-list"></i></button>
+                        <h1 class="page-title">Tarefas Avulsas da Equipe</h1>
+                    </div>
+                </div>
+                <div style="padding: 40px; text-align: center; margin-top: 50px;">
+                    <i class="ph ph-list-checks"
+                        style="font-size: 4rem; color: var(--primary); margin-bottom: 20px;"></i>
+                    <h2>Área em Desenvolvimento</h2>
+                    <p style="color: var(--text-muted); max-width: 500px; margin: 10px auto;">O antigo quadro de tarefas
+                        será focado apenas em demandas administrativas.</p>
+                </div>
+            </div>
+
+            <!-- 4. META PWR -->
             <div id="view-metapwr" style="display: none;">
                 <div class="header-actions">
                     <div style="display: flex; align-items: center; gap: 10px;">
@@ -165,9 +198,9 @@
                 </div>
                 <div style="padding: 40px; text-align: center; margin-top: 50px;">
                     <i class="ph ph-target" style="font-size: 4rem; color: var(--primary); margin-bottom: 20px;"></i>
-                    <h2>Ãrea em Desenvolvimento</h2>
-                    <p style="color: var(--text-muted); max-width: 500px; margin: 10px auto;">Acompanhamento das Metas
-                        PWR da Expansão serÃ¡ liberado em breve.</p>
+                    <h2>Área em Desenvolvimento</h2>
+                    <p style="color: var(--text-muted); max-width: 500px; margin: 10px auto;">O pilar de metas de
+                        faturamento e vendas das lojas para avaliação de Obras.</p>
                 </div>
             </div>
         </main>
@@ -186,12 +219,14 @@
                     <div style="flex: 1;">
                         <label style="font-size: 0.8rem; color: var(--text-muted); font-weight:600;">Região / Unidade de
                             Loja</label>
-                        <input type="text" id="modalCardLoja" placeholder="Ex: Loja Iguatemi">
+                        <input type="text" id="modalCardLoja" placeholder="Ex: Loja Iguatemi"
+                            style="width: 100%; border: 1px solid var(--border); padding: 8px; border-radius: 6px; background: var(--bg-color); color: var(--text-main);">
                     </div>
                     <div style="width: 200px;">
-                        <label style="font-size: 0.8rem; color: var(--text-muted); font-weight:600;">Status do Motor
-                            Kanban</label>
-                        <select id="modalCardStatus">
+                        <label style="font-size: 0.8rem; color: var(--text-muted); font-weight:600;">Status da
+                            Obra</label>
+                        <select id="modalCardStatus"
+                            style="width: 100%; border: 1px solid var(--border); padding: 8px; border-radius: 6px; background: var(--bg-color); color: var(--text-main);">
                             <option value="backlog">Backlog / Triagem</option>
                             <option value="planejamento">Pré-Obra / Orçamento</option>
                             <option value="fase1">Fase 1 (Demolição/Escr.)</option>
@@ -206,10 +241,10 @@
             <div style="padding: 5px 0 20px 0;">
                 <input type="hidden" id="modalCardId">
 
-                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: start;">
                     <!-- Coluna Esquerda: Descrição, Checklists -->
                     <div>
-                        <h4 style="margin: 0 0 10px 0; color: var(--primary);">Tag de Tipo:</h4>
+                        <h4 style="margin: 0 0 10px 0; color: var(--primary);">Tag Prioritária:</h4>
                         <div class="tags-container" style="margin-bottom: 20px;">
                             <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;"><input
                                     type="radio" name="modalTagExp" value="Urgente"> <span
@@ -230,27 +265,25 @@
                         <div class="progress-container" style="margin-bottom: 15px; height: 10px;">
                             <div class="progress-bar" id="modalChecklistProgress" style="width: 0%;"></div>
                         </div>
-                        <div id="modalChecklistItensContainer" style="margin-bottom: 15px;">
-                            <!-- Injetado via JS -->
-                        </div>
+                        <div id="modalChecklistItensContainer" style="margin-bottom: 15px;"></div>
+
                         <div style="display: flex; gap: 10px; margin-bottom: 30px;">
                             <input type="text" id="novoChecklistItemInput" placeholder="Adicionar verificação..."
-                                style="padding: 6px 10px;">
+                                style="padding: 6px 10px; flex: 1; border: 1px solid var(--border); border-radius: 4px; background: var(--bg-color); color: var(--text-main);">
                             <button class="btn btn-outline" onclick="window.addChecklistItemCard()"><i
                                     class="ph ph-plus"></i></button>
                         </div>
 
                         <h4 style="margin: 0 0 10px 0; color: var(--primary);"><i class="ph ph-chat-text"></i> Diário da
-                            Obra / Comentários</h4>
+                            Obra</h4>
                         <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                            <textarea id="novoComentarioCard" rows="2"
-                                placeholder="Descreva os progressos de hoje, ocorrências..." style="flex:1;"></textarea>
+                            <textarea id="novoComentarioCard" rows="2" placeholder="Descreva os progressos..."
+                                style="flex:1; border: 1px solid var(--border); background: var(--bg-color); color: var(--text-main); border-radius: 6px; padding: 8px;"></textarea>
                             <button class="btn btn-primary" onclick="window.addComentarioCardExpansao()"><i
                                     class="ph ph-paper-plane-right"></i></button>
                         </div>
                         <div id="modalComentariosContainer"
-                            style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;">
-                            <!-- Injetado JS -->
+                            style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 5px;">
                         </div>
                     </div>
 
@@ -263,32 +296,36 @@
                             <div style="margin-bottom: 10px;">
                                 <label
                                     style="font-size: 0.75rem; color: var(--text-muted); display:block; margin-bottom:4px;">Início
-                                    da Obra/Aprovação</label>
-                                <input type="date" id="modalDataInicio" style="padding: 6px;">
+                                    da Obra</label>
+                                <input type="date" id="modalDataInicio"
+                                    style="padding: 6px; width: 100%; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); color: var(--text-main);">
                             </div>
                             <div>
                                 <label
                                     style="font-size: 0.75rem; color: var(--text-muted); display:block; margin-bottom:4px;">Previsão
-                                    de Entrega Final</label>
-                                <input type="date" id="modalDataFim" style="padding: 6px;">
+                                    de Entrega</label>
+                                <input type="date" id="modalDataFim"
+                                    style="padding: 6px; width: 100%; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); color: var(--text-main);">
                             </div>
                         </div>
 
                         <div
                             style="background: var(--bg-color); padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 20px;">
                             <h4 style="margin: 0 0 10px 0; color: var(--primary);"><i class="ph ph-currency-dollar"></i>
-                                Bloco Financeiro</h4>
+                                Financeiro</h4>
                             <div style="margin-bottom: 10px;">
                                 <label
                                     style="font-size: 0.75rem; color: var(--text-muted); display:block; margin-bottom:4px;">Custo
                                     Previsto (R$)</label>
-                                <input type="number" id="modalCustoPrev" placeholder="Ex: 15000" style="padding: 6px;">
+                                <input type="number" id="modalCustoPrev" placeholder="Ex: 15000"
+                                    style="padding: 6px; width: 100%; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); color: var(--text-main);">
                             </div>
                             <div>
                                 <label
                                     style="font-size: 0.75rem; color: var(--text-muted); display:block; margin-bottom:4px;">Custo
-                                    Final Executado (R$)</label>
-                                <input type="number" id="modalCustoReal" placeholder="Ex: 14500" style="padding: 6px;">
+                                    Final Executado</label>
+                                <input type="number" id="modalCustoReal" placeholder="Ex: 14500"
+                                    style="padding: 6px; width: 100%; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); color: var(--text-main);">
                             </div>
                         </div>
 
@@ -297,15 +334,13 @@
                             <h4 style="margin: 0 0 10px 0; color: var(--primary);"><i class="ph ph-paperclip"></i>
                                 Anexos & Fotos URL</h4>
                             <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-                                <input type="text" id="modalNovoAnexoURL" placeholder="http://link-do-pdf-ou-foto"
-                                    style="padding: 6px; flex: 1;">
+                                <input type="text" id="modalNovoAnexoURL" placeholder="http://link-foto..."
+                                    style="padding: 6px; flex: 1; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); color: var(--text-main);">
                                 <button class="btn btn-outline" style="padding: 6px;" onclick="window.addAnexoCard()"><i
                                         class="ph ph-plus"></i></button>
                             </div>
                             <ul id="modalAnexosContainer"
-                                style="padding-left: 15px; margin:0; font-size: 0.8rem; color: var(--accent);">
-                                <!-- URLs dos anexos -->
-                            </ul>
+                                style="padding-left: 15px; margin:0; font-size: 0.8rem; color: var(--accent);"></ul>
                         </div>
                     </div>
                 </div>
@@ -313,7 +348,7 @@
                 <div
                     style="margin-top: 25px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 20px;">
                     <button class="btn btn-danger" id="btnExcluirCardExpansao" style="display: none;"
-                        onclick="window.excluirObra()"><i class="ph ph-trash"></i> Descartar Processo</button>
+                        onclick="window.excluirObra()"><i class="ph ph-trash"></i> Excluir Job</button>
                     <button class="btn btn-primary" onclick="window.salvarCardExpansao()" style="margin-left: auto;"><i
                             class="ph ph-floppy-disk"></i> Salvar Workflow</button>
                 </div>
@@ -321,6 +356,7 @@
         </div>
     </div>
 
+    <!-- O Script foi movido de module para standard com objeto global para evitar erros de renderização -->
     <script type="module" src="js/app.js"></script>
 </body>
 
