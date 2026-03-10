@@ -23,7 +23,7 @@ window.handleAuth = async function () {
 
         if (querySnapshot.empty) {
             if (user === 'admin' && pass === '$@np@010') {
-                const allSectors = ["TI", "Auditoria", "Controladoria", "Fiscal", "Financeiro", "Marketing", "Gente_Gestao", "Operacao", "Varejo"];
+                const allSectors = ["Diretoria", "TI", "Auditoria", "Controladoria", "Fiscal", "Financeiro", "Marketing", "Gente_Gestao", "Operacao", "Varejo"];
                 await addDoc(collection(db, "users"), { user: 'admin', pass: '$@np@010', setores_permitidos: allSectors });
                 sessionStorage.setItem('loggedUser', user);
                 sessionStorage.setItem('userSectors', JSON.stringify(allSectors));
@@ -47,7 +47,7 @@ window.handleAuth = async function () {
         if (userData.pass === pass) {
             let sectors = userData.setores_permitidos || ["TI"];
             if (user === 'admin') {
-                sectors = ["TI", "Auditoria", "Controladoria", "Fiscal", "Financeiro", "Marketing", "Gente_Gestao", "Operacao", "Varejo"];
+                sectors = ["Diretoria", "TI", "Auditoria", "Controladoria", "Fiscal", "Financeiro", "Marketing", "Gente_Gestao", "Operacao", "Varejo"];
             }
             sessionStorage.setItem('userSectors', JSON.stringify(sectors));
             sessionStorage.setItem('loggedUser', user);
@@ -88,7 +88,7 @@ function initApp() {
 
     document.getElementById('hub-container').style.display = 'block';
 
-    const allHubSectors = ["TI", "Auditoria", "Controladoria", "Fiscal", "Financeiro", "Marketing", "Gente_Gestao", "Operacao", "Varejo"];
+    const allHubSectors = ["Diretoria", "TI", "Auditoria", "Controladoria", "Fiscal", "Financeiro", "Marketing", "Gente_Gestao", "Operacao", "Varejo"];
     allHubSectors.forEach(sec => {
         const card = document.getElementById('hub-card-' + sec);
         if (card) {
@@ -157,7 +157,7 @@ function renderAdminUsersList() {
     listHtml.innerHTML = '';
 
     const termo = document.getElementById('buscaUsuarioAdmin') ? document.getElementById('buscaUsuarioAdmin').value.toLowerCase().trim() : '';
-    const allSectors = ["TI", "Auditoria", "Controladoria", "Fiscal", "Financeiro", "Marketing", "Gente_Gestao", "Operacao", "Varejo"];
+    const allSectors = ["Diretoria", "TI", "Auditoria", "Controladoria", "Fiscal", "Financeiro", "Marketing", "Gente_Gestao", "Operacao", "Varejo"];
 
     let usuariosFiltrados = allUsersCache.filter(u => u.user.toLowerCase().includes(termo));
 

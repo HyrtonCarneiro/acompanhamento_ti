@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Executivo | Diretoria San Paolo</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="../../css/styles.css">
+</head>
+
+<body>
+
+    <button class="btn-menu-toggle" onclick="window.toggleSidebar()"
+        style="position: fixed; top: 15px; left: 15px; z-index: 1100;">
+        <i class="ph ph-list"></i>
+    </button>
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="window.toggleSidebar()"></div>
+
+    <div class="sidebar" id="appSidebar">
+        <!-- Logotipo Exclusivo C-Level -->
+        <div class="brand" style="justify-content: center; gap: 8px; border-bottom: 2px solid var(--sp-laranja);">
+            <i class="ph-fill ph-crown" style="color: var(--sp-laranja); font-size: 1.5rem;"></i>
+            <span style="color: var(--sp-red); font-weight: 800;">Diretoria</span>
+        </div>
+
+        <div class="nav-menu">
+            <div class="nav-item active" onclick="window.switchView('visao')" id="nav-visao">
+                <i class="ph ph-chart-polar"></i> Visão Executiva
+            </div>
+            <div class="nav-item" onclick="window.switchView('ranking')" id="nav-ranking">
+                <i class="ph ph-medal"></i> Ranking de Lojas
+            </div>
+            <div class="nav-item" onclick="window.switchView('atos')" id="nav-atos">
+                <i class="ph ph-megaphone"></i> Sala de Atos
+            </div>
+            <div class="nav-item" onclick="window.switchView('cofre')" id="nav-cofre">
+                <i class="ph ph-vault"></i> Cofre de Arquivos
+            </div>
+            <div class="nav-item" onclick="window.switchView('inovacao')" id="nav-inovacao">
+                <i class="ph ph-lightbulb-filament"></i> Radar de Inovação
+            </div>
+        </div>
+
+        <div class="user-section">
+            <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 5px;">Acessando como Direção:</div>
+            <div style="font-weight: 600; display: flex; align-items: center; justify-content: space-between;">
+                <span id="loggedUserName" style="color: var(--primary);">User</span>
+                <i class="ph-fill ph-moon" style="cursor: pointer; font-size: 1.2rem; color: var(--text-muted);"
+                    onclick="window.toggleDarkMode()" title="Alternar Tema"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+
+        <!-- Visão Executiva -->
+        <div id="view-visao">
+            <div class="header-actions">
+                <h1 class="page-title">C-Level Dashboard</h1>
+            </div>
+            <div
+                style="padding: 60px; text-align: center; margin-top: 20px; border: 2px dashed var(--border); border-radius: 12px; background: var(--surface);">
+                <i class="ph ph-chart-polar"
+                    style="font-size: 4.5rem; color: var(--sp-laranja); margin-bottom: 20px;"></i>
+                <h2 style="color: var(--primary);">Módulo Executivo Global</h2>
+                <p style="color: var(--text-muted); max-width: 600px; margin: 15px auto; font-size: 1.1rem;">
+                    Termômetro holístico consolidando os pilares de Faturamento, Custos Gerais e Turn-over Global de
+                    todas as regionais em um mapa de calor D-1.
+                </p>
+                <span class="badge badge-tag"
+                    style="background: var(--sp-morango); color: #8F0810; padding: 6px 16px; font-size: 0.9rem;">Em
+                    Desenvolvimento (Breve)</span>
+            </div>
+        </div>
+
+        <!-- Ranking Lojas -->
+        <div id="view-ranking" style="display: none;">
+            <div class="header-actions">
+                <h1 class="page-title">Performance: Ranking</h1>
+            </div>
+            <div
+                style="padding: 60px; text-align: center; margin-top: 20px; border: 2px dashed var(--border); border-radius: 12px; background: var(--surface);">
+                <i class="ph ph-medal" style="font-size: 4.5rem; color: var(--sp-pistache); margin-bottom: 20px;"></i>
+                <h2 style="color: var(--primary);">Ranking Gamificado de Lojas</h2>
+                <p style="color: var(--text-muted); max-width: 600px; margin: 15px auto; font-size: 1.1rem;">
+                    Lista de Top 5 ganhadoras da Meta PWR e Bottom 5 para pontos de atenção. Mural de premiação e visões
+                    gamificadas instantâneas.
+                </p>
+                <span class="badge badge-tag"
+                    style="background: var(--sp-morango); color: #8F0810; padding: 6px 16px; font-size: 0.9rem;">Em
+                    Desenvolvimento (Breve)</span>
+            </div>
+        </div>
+
+        <!-- Sala de Atos -->
+        <div id="view-atos" style="display: none;">
+            <div class="header-actions">
+                <h1 class="page-title">Sala de Atos & Flash Reports</h1>
+            </div>
+            <div
+                style="padding: 60px; text-align: center; margin-top: 20px; border: 2px dashed var(--border); border-radius: 12px; background: var(--surface);">
+                <i class="ph ph-megaphone"
+                    style="font-size: 4.5rem; color: var(--sp-aoleite); margin-bottom: 20px;"></i>
+                <h2 style="color: var(--primary);">Comunicados Institucionais</h2>
+                <p style="color: var(--text-muted); max-width: 600px; margin: 15px auto; font-size: 1.1rem;">
+                    Centro de emissão de flash reports da Diretoria para toda a frota de lojas. Alertas imediatos
+                    automáticos quando métricas saem do trilho de segurança.
+                </p>
+                <span class="badge badge-tag"
+                    style="background: var(--sp-morango); color: #8F0810; padding: 6px 16px; font-size: 0.9rem;">Em
+                    Desenvolvimento (Breve)</span>
+            </div>
+        </div>
+
+        <!-- Cofre de Documentos -->
+        <div id="view-cofre" style="display: none;">
+            <div class="header-actions">
+                <h1 class="page-title">Cofre de Arquivos Administrativos</h1>
+            </div>
+            <div
+                style="padding: 60px; text-align: center; margin-top: 20px; border: 2px dashed var(--border); border-radius: 12px; background: var(--surface);">
+                <i class="ph ph-vault" style="font-size: 4.5rem; color: var(--text-main); margin-bottom: 20px;"></i>
+                <h2 style="color: var(--primary);">Repositório de Políticas</h2>
+                <p style="color: var(--text-muted); max-width: 600px; margin: 15px auto; font-size: 1.1rem;">
+                    Ambiente seguro e assinado com os documentos restritos de C-Level Corporativo (DREs, Demonstrativos,
+                    Atas).
+                </p>
+                <span class="badge badge-tag"
+                    style="background: var(--sp-morango); color: #8F0810; padding: 6px 16px; font-size: 0.9rem;">Em
+                    Desenvolvimento (Breve)</span>
+            </div>
+        </div>
+
+        <!-- Radar Inovação -->
+        <div id="view-inovacao" style="display: none;">
+            <div class="header-actions">
+                <h1 class="page-title">Radar de Inovação & Ideias Externas</h1>
+            </div>
+            <div
+                style="padding: 60px; text-align: center; margin-top: 20px; border: 2px dashed var(--border); border-radius: 12px; background: var(--surface);">
+                <i class="ph ph-lightbulb-filament"
+                    style="font-size: 4.5rem; color: var(--sp-laranja); margin-bottom: 20px;"></i>
+                <h2 style="color: var(--primary);">Ouvidoria de Ideias San Paolo</h2>
+                <p style="color: var(--text-muted); max-width: 600px; margin: 15px auto; font-size: 1.1rem;">
+                    Caixa de sugestões e ouvidoria blindada para colaboradores compartilharem melhorias essenciais
+                    vindas direto da balança e do balcão para a diretoria.
+                </p>
+                <span class="badge badge-tag"
+                    style="background: var(--sp-morango); color: #8F0810; padding: 6px 16px; font-size: 0.9rem;">Em
+                    Desenvolvimento (Breve)</span>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+
+</html>
