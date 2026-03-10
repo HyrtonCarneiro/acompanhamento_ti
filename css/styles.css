@@ -624,24 +624,51 @@ textarea:focus {
     }
 }
 
-/* Kanban Styles */
+/* Kanban Styles Módulo Expansão */
 .kanban-board {
     display: flex;
     gap: 20px;
     overflow-x: auto;
-    padding-bottom: 10px;
+    padding-bottom: 20px;
     align-items: flex-start;
+    scroll-snap-type: x mandatory;
 }
 
 .kanban-col {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 8px;
-    flex: 1;
-    min-width: 300px;
+    flex: 0 0 320px;
     display: flex;
     flex-direction: column;
     padding: 15px;
+    max-height: 80vh;
+    scroll-snap-align: start;
+}
+
+.kanban-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    flex-grow: 1;
+    padding-right: 5px;
+    min-height: 50px;
+}
+
+/* Custom Scrollbar for columns */
+.kanban-cards::-webkit-scrollbar {
+    width: 6px;
+}
+
+.kanban-cards::-webkit-scrollbar-track {
+    background: var(--bg-color);
+    border-radius: 4px;
+}
+
+.kanban-cards::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
 }
 
 .kanban-col-header {
@@ -655,7 +682,9 @@ textarea:focus {
 
 .kanban-col-header h3 {
     margin: 0;
-    font-size: 1.1rem;
+    font-size: 1.05rem;
+    color: var(--text-main);
+    font-weight: 700;
 }
 
 .kanban-col-count {
@@ -665,6 +694,213 @@ textarea:focus {
     font-weight: bold;
     padding: 2px 8px;
     border-radius: 12px;
+}
+
+/* Card de Obra Moderno */
+.kanban-card-item {
+    background: var(--bg-color);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 15px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    border-left: 4px solid var(--sp-aoleite);
+}
+
+.kanban-card-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px -2px rgba(0, 0, 0, 0.1);
+    border-color: var(--sp-laranja);
+}
+
+.kanban-card-item.late {
+    border-left-color: var(--sp-red);
+}
+
+/* Tags San Paolo no Card */
+.tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.tag {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tag-urgente {
+    background: var(--sp-red);
+    color: white;
+}
+
+.dark-mode .tag-urgente {
+    background: #8f0810;
+}
+
+.tag-expansao {
+    background: var(--sp-aoleite);
+    color: white;
+}
+
+.tag-preventiva {
+    background: var(--sp-pistache);
+    color: white;
+}
+
+.dark-mode .tag-preventiva {
+    background: #2f4521;
+    color: #a7f3d0;
+}
+
+.tag-estetica {
+    background: var(--sp-laranja);
+    color: white;
+}
+
+.kanban-card-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0 0 8px 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-clamp: 2;
+}
+
+.kanban-card-loja {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Metadata indicators no Card (Checklist, Anexos, Comentarios) */
+.kanban-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+    margin-top: 5px;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.meta-item.overdue {
+    color: var(--sp-red);
+    font-weight: 600;
+}
+
+/* Progress Bar Checklists */
+.progress-container {
+    width: 100%;
+    background-color: var(--border);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    height: 6px;
+    overflow: hidden;
+    margin-top: 6px;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: var(--sp-pistache);
+    transition: width 0.3s ease;
+}
+
+/* Checklist Items Internos do Modal */
+.checklist-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 12px;
+    background: var(--bg-color);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 8px;
+    transition: 0.2s;
+}
+
+.checklist-item.checked {
+    opacity: 0.6;
+    text-decoration: line-through;
+    background: transparent;
+}
+
+.checklist-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    accent-color: var(--sp-laranja);
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.checklist-item-text {
+    flex-grow: 1;
+    font-size: 0.9rem;
+    color: var(--text-main);
+}
+
+.checklist-item-delete {
+    color: var(--danger);
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    padding: 2px;
+}
+
+/* Tabela de Orçamento */
+.orcamento-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 0.85rem;
+}
+
+.orcamento-table th {
+    text-align: left;
+    padding: 8px;
+    border-bottom: 2px solid var(--border);
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.orcamento-table td {
+    padding: 8px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-main);
+}
+
+.orcamento-table tr:hover {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.dark-mode .orcamento-table tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.orc-status-aprovado {
+    color: var(--sp-pistache);
+    font-weight: 600;
 }
 
 /* Status Colors - Adaptado para o Brand */
