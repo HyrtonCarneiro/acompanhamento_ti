@@ -1,5 +1,19 @@
 // setores/Diretoria/js/app.js
+import { db, collection, addDoc, getDocs, updateDoc, doc, deleteDoc, onSnapshot, query, orderBy } from '../../../js/firebase.js';
+
 let currentUser = sessionStorage.getItem('loggedUser') || null;
+let equipeCache = [];
+
+function showToast(msg, type = 'success') {
+    try {
+        if (typeof Toastify !== 'undefined') {
+            Toastify({
+                text: msg, duration: 3000, gravity: "top", position: "right",
+                style: { background: type === 'success' ? "var(--sp-pistache)" : (type === 'warning' ? "var(--sp-laranja)" : "var(--sp-red)"), borderRadius: "8px", fontFamily: "Inter" }
+            }).showToast();
+        } else { alert(msg); }
+    } catch (e) { console.error(e); }
+}
 
 window.toggleDarkMode = function () {
     document.body.classList.toggle('dark-mode');
@@ -50,7 +64,23 @@ function initApp() {
         }
     });
 
+    // Iniciar listener de equipe
+    iniciarListenerEquipe();
+
     window.switchView('visao');
+}
+
+function iniciarListenerEquipe() {
+    try {
+        const qEquipe = query(collection(db, "diretoria_equipe"), orderBy("nome"));
+        onSnapshot(qEquipe, (snapshot) => {
+            equipeCache = [];
+            snapshot.forEach(docSnap => equipeCache.push({ firebaseId: docSnap.id, ...docSnap.data() }));
+            renderizarListaEquipeGerenciar();
+        }, (err) => console.error("Erro Equipe:", err));
+    } catch (e) {
+        console.error("Erro ao iniciar listener equipe", e);
+    }
 }
 
 window.switchView = function (view) {
@@ -82,6 +112,59 @@ window.toggleSidebar = function () {
         sidebar.classList.toggle('open');
         overlay.classList.toggle('show');
     }
+}
+
+// ====== EQUIPE ======
+window.abrirModalEquipe = function () {
+    document.getElementById('modalEquipe').classList.add('show');
+}
+
+window.fecharModalEquipe = function () {
+    document.getElementById('modalEquipe').classList.remove('show');
+}
+
+window.adicionarMembro = async function () {
+    const nome = document.getElementById('novoMembroNome').value.trim();
+    if (!nome) return showToast("Digite um nome", "error");
+    if (equipeCache.find(m => m.nome.toLowerCase() === nome.toLowerCase())) {
+        return showToast("Membro já existe", "error");
+    }
+    try {
+        await addDoc(collection(db, "diretoria_equipe"), { nome });
+        document.getElementById('novoMembroNome').value = '';
+        showToast("Membro adicionado!");
+    } catch (e) {
+        console.error(e);
+        showToast("Erro ao adicionar", "error");
+    }
+}
+
+window.removerMembro = async function (idMembro, nomeMembro) {
+    if (!confirm(`Excluir ${nomeMembro} da equipe?`)) return;
+    try {
+        await deleteDoc(doc(db, "diretoria_equipe", idMembro));
+        showToast("Membro removido.");
+    } catch (e) {
+        console.error(e);
+        showToast("Erro ao remover", "error");
+    }
+}
+
+function renderizarListaEquipeGerenciar() {
+    const container = document.getElementById('listaEquipeGerenciar');
+    if (!container) return;
+    container.innerHTML = '';
+    equipeCache.forEach(m => {
+        const div = document.createElement('div');
+        div.style = "display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid var(--border);";
+        div.innerHTML = `
+            <span>${m.nome}</span>
+            <button class="btn btn-danger" style="padding: 5px 10px;" onclick="window.removerMembro('${m.firebaseId}', '${m.nome}')">
+                <i class="ph ph-trash"></i>
+            </button>
+        `;
+        container.appendChild(div);
+    });
 }
 
 if (currentUser) initApp();
