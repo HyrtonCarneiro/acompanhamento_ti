@@ -338,24 +338,30 @@
                             </h4>
                             <div class="tags-container" style="display: flex; flex-wrap: wrap; gap: 12px;">
                                 <label
-                                    style="cursor: pointer; display: flex; align-items: center; gap: 8px; background: var(--bg-color); padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border);">
-                                    <input type="radio" name="modalTagExp" value="Urgente">
-                                    <span class="tag tag-urgente" style="margin:0;">Urgente</span>
+                                    style="cursor: pointer; display: flex; align-items: center; gap: 8px; background: var(--bg-color); padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border); position: relative;">
+                                    <input type="radio" name="modalTagExp" value="Urgente"
+                                        style="opacity: 0; position: absolute;">
+                                    <span class="tag tag-urgente" style="margin:0; pointer-events: none;">Urgente</span>
                                 </label>
                                 <label
-                                    style="cursor: pointer; display: flex; align-items: center; gap: 8px; background: var(--bg-color); padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border);">
-                                    <input type="radio" name="modalTagExp" value="Expansão">
-                                    <span class="tag tag-expansao" style="margin:0;">Nova Loja</span>
+                                    style="cursor: pointer; display: flex; align-items: center; gap: 8px; background: var(--bg-color); padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border); position: relative;">
+                                    <input type="radio" name="modalTagExp" value="Obras"
+                                        style="opacity: 0; position: absolute;">
+                                    <span class="tag tag-obras" style="margin:0; pointer-events: none;">Obras</span>
                                 </label>
                                 <label
-                                    style="cursor: pointer; display: flex; align-items: center; gap: 8px; background: var(--bg-color); padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border);">
-                                    <input type="radio" name="modalTagExp" value="Preventiva">
-                                    <span class="tag tag-preventiva" style="margin:0;">Manutenção</span>
+                                    style="cursor: pointer; display: flex; align-items: center; gap: 8px; background: var(--bg-color); padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border); position: relative;">
+                                    <input type="radio" name="modalTagExp" value="Manutenção"
+                                        style="opacity: 0; position: absolute;">
+                                    <span class="tag tag-manutencao"
+                                        style="margin:0; pointer-events: none;">Manutenção</span>
                                 </label>
                                 <label
-                                    style="cursor: pointer; display: flex; align-items: center; gap: 8px; background: var(--bg-color); padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border);">
-                                    <input type="radio" name="modalTagExp" value="Estética" checked>
-                                    <span class="tag tag-estetica" style="margin:0;">Retrofit</span>
+                                    style="cursor: pointer; display: flex; align-items: center; gap: 8px; background: var(--bg-color); padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border); position: relative;">
+                                    <input type="radio" name="modalTagExp" value="Retrofit"
+                                        style="opacity: 0; position: absolute;" checked>
+                                    <span class="tag tag-retrofit"
+                                        style="margin:0; pointer-events: none;">Retrofit</span>
                                 </label>
                             </div>
                         </div>

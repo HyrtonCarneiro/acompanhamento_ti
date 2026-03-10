@@ -162,9 +162,9 @@ function renderKanban(obras) {
 
                 let tagClasses = '';
                 if (obra.tag === 'Urgente') tagClasses = 'tag-urgente';
-                if (obra.tag === 'Expansão') tagClasses = 'tag-expansao';
-                if (obra.tag === 'Preventiva') tagClasses = 'tag-preventiva';
-                if (obra.tag === 'Estética') tagClasses = 'tag-estetica';
+                if (obra.tag === 'Obras') tagClasses = 'tag-obras';
+                if (obra.tag === 'Manutenção') tagClasses = 'tag-manutencao';
+                if (obra.tag === 'Retrofit') tagClasses = 'tag-retrofit';
 
                 const cardHtml = `
                     <div class="kanban-card-item ${isLate ? 'late' : ''}" draggable="true" ondragstart="window.dragExpansao(event)" id="card-${obra.id}" data-id="${obra.id}" onclick="window.abrirModalCardExpansao('${obra.id}')">
@@ -451,8 +451,8 @@ window.abrirModalCardExpansao = function (id = null) {
         if (document.getElementById('modalCardTituloInput')) document.getElementById('modalCardTituloInput').value = '';
         document.getElementById('modalCardLoja').value = '';
         document.getElementById('modalCardStatus').value = 'backlog';
-        if (document.querySelector('input[name="modalTagExp"][value="Estética"]')) {
-            document.querySelector('input[name="modalTagExp"][value="Estética"]').checked = true;
+        if (document.querySelector('input[name="modalTagExp"][value="Retrofit"]')) {
+            document.querySelector('input[name="modalTagExp"][value="Retrofit"]').checked = true;
         }
         document.getElementById('modalDataInicio').value = '';
         document.getElementById('modalDataFim').value = '';
@@ -487,7 +487,7 @@ window.abrirModalCardExpansao = function (id = null) {
                 document.getElementById('modalCardLoja').value = obra.loja;
                 document.getElementById('modalCardStatus').value = obra.status;
 
-                const radioTag = document.querySelector(`input[name="modalTagExp"][value="${obra.tag || 'Estética'}"]`);
+                const radioTag = document.querySelector(`input[name="modalTagExp"][value="${obra.tag || 'Retrofit'}"]`);
                 if (radioTag) radioTag.checked = true;
 
                 document.getElementById('modalDataInicio').value = obra.dataInicio || '';
@@ -525,7 +525,7 @@ window.salvarCardExpansao = async function () {
         const loja = document.getElementById('modalCardLoja').value;
         const status = document.getElementById('modalCardStatus').value;
         const radioSelected = document.querySelector('input[name="modalTagExp"]:checked');
-        const tag = radioSelected ? radioSelected.value : 'Estética';
+        const tag = radioSelected ? radioSelected.value : 'Retrofit';
 
         const dataInicio = document.getElementById('modalDataInicio').value;
         const dataFim = document.getElementById('modalDataFim').value;

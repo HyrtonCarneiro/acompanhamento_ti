@@ -23,6 +23,12 @@
     /* Tonalidade da familia terrosa mais leve */
     --border: #D1C8B4;
     /* Off-white sombreado */
+
+    /* RGB variants for transparency */
+    --primary-rgb: 218, 13, 23;
+    --secondary-rgb: 38, 93, 124;
+    --success-rgb: 79, 112, 57;
+    --warning-rgb: 218, 85, 19;
 }
 
 body.dark-mode {
@@ -1159,7 +1165,34 @@ textarea:focus {
     border-radius: 10px;
 }
 
-/* Radio Tags Estilizadas */
+/* TAGS GLOBAIS */
+.tag {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #fff;
+    display: inline-block;
+}
+
+.tag-urgente {
+    background-color: var(--sp-red);
+}
+
+.tag-obras {
+    background-color: var(--sp-aoleite);
+}
+
+.tag-manutencao {
+    background-color: var(--sp-pistache);
+}
+
+.tag-retrofit {
+    background-color: var(--sp-laranja);
+}
+
+/* Seção de Tags no Modal */
 .tags-container label {
     transition: all 0.2s ease;
     border: 1px solid var(--border);
