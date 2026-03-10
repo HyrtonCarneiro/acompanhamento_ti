@@ -92,18 +92,14 @@ function popularFiltroRegionaisExpansao() {
 }
 
 function configurarOuvinteTagsModal() {
+    // Listener para feedback visual nas tags (highlight na seleção)
     const container = document.querySelector('.tags-container');
     if (!container) return;
 
     container.addEventListener('change', (e) => {
         if (e.target.name === 'modalTagExp') {
-            const isNovaLoja = e.target.value === 'Nova Loja';
-            document.getElementById('containerLojaExistente').style.display = isNovaLoja ? 'none' : 'block';
-            document.getElementById('containerNovaLoja').style.display = isNovaLoja ? 'block' : 'none';
-
-            // Se for Nova Loja, limpa o select para não ter conflito visual
-            if (isNovaLoja) document.getElementById('modalCardLoja').value = '';
-            else document.getElementById('modalCardNovaLojaInput').value = '';
+            // Tag selecionada pode ser usada para lógica futura
+            console.log('Tag selecionada:', e.target.value);
         }
     });
 }
@@ -506,7 +502,6 @@ window.abrirModalCardExpansao = function (id = null) {
         document.getElementById('modalCardId').value = '';
         if (document.getElementById('modalCardTituloInput')) document.getElementById('modalCardTituloInput').value = '';
         document.getElementById('modalCardLoja').value = '';
-        document.getElementById('modalCardNovaLojaInput').value = '';
         document.getElementById('modalCardStatus').value = 'backlog';
 
         if (document.querySelector('input[name="modalTagExp"][value="Retrofit"]')) {
