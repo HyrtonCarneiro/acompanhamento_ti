@@ -11,6 +11,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
     <link rel="stylesheet" href="../../css/styles.css">
 </head>
 
@@ -26,13 +30,12 @@
                 <div class="nav-item active" onclick="window.switchView('dashboard')" id="nav-dashboard">
                     <i class="ph ph-chart-pie-slice"></i> Dashboard
                 </div>
-                <!-- Nova Aba Exclusiva de Kanban Lojas/Obras -->
                 <div class="nav-item" onclick="window.switchView('obras')" id="nav-obras">
                     <i class="ph ph-buildings"></i> Obras & Projetos
                 </div>
-                <!-- Tarefas Genéricas da Equipe mantida -->
+                <!-- Tarefas de Equipe Clássicas -->
                 <div class="nav-item" onclick="window.switchView('tarefas')" id="nav-tarefas">
-                    <i class="ph ph-list-checks"></i> Tarefas da Equipe
+                    <i class="ph ph-kanban"></i> Tarefas da Equipe
                 </div>
                 <div class="nav-item" onclick="window.switchView('metapwr')" id="nav-metapwr">
                     <i class="ph ph-target"></i> Meta PWR
@@ -47,7 +50,7 @@
                         <i class="ph ph-moon"></i> Tema Escuro
                     </button>
                     <button class="btn btn-outline" style="width: 100%; justify-content: center;"
-                        onclick="window.location.href = '../../index.html'">
+                        onclick="window.logout()">
                         <i class="ph ph-sign-out"></i> Voltar / Sair
                     </button>
                 </div>
@@ -75,7 +78,7 @@
 
             <!-- 2. OBRAS & PROJETOS KANBAN -->
             <div id="view-obras" style="display: none; height: 100%; display: flex; flex-direction: column;">
-                <div class="header-actions">
+                <div class="header-actions" style="margin-bottom: 24px;">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <button class="btn-menu-toggle" onclick="window.toggleSidebar()"><i
                                 class="ph ph-list"></i></button>
@@ -112,7 +115,8 @@
                             <h3>Backlog & Standby</h3>
                             <span class="kanban-col-count" id="count-backlog">0</span>
                         </div>
-                        <div class="kanban-cards" ondrop="window.drop(event)" ondragover="window.allowDrop(event)">
+                        <div class="kanban-cards" ondrop="window.dropExpansao(event)"
+                            ondragover="window.allowDropExpansao(event)">
                             <!-- Cards injetados via JS -->
                         </div>
                     </div>
@@ -123,8 +127,8 @@
                             <h3>Planej. / Projetos</h3>
                             <span class="kanban-col-count" id="count-planejamento">0</span>
                         </div>
-                        <div class="kanban-cards" ondrop="window.drop(event)" ondragover="window.allowDrop(event)">
-                        </div>
+                        <div class="kanban-cards" ondrop="window.dropExpansao(event)"
+                            ondragover="window.allowDropExpansao(event)"></div>
                     </div>
 
                     <!-- Coluna 3: Fase 1 -->
@@ -133,8 +137,8 @@
                             <h3>Fase 1 (Mobilização)</h3>
                             <span class="kanban-col-count" id="count-fase1">0</span>
                         </div>
-                        <div class="kanban-cards" ondrop="window.drop(event)" ondragover="window.allowDrop(event)">
-                        </div>
+                        <div class="kanban-cards" ondrop="window.dropExpansao(event)"
+                            ondragover="window.allowDropExpansao(event)"></div>
                     </div>
 
                     <!-- Coluna 4: Fase 2 -->
@@ -143,8 +147,8 @@
                             <h3>Fase 2 (Instalações)</h3>
                             <span class="kanban-col-count" id="count-fase2">0</span>
                         </div>
-                        <div class="kanban-cards" ondrop="window.drop(event)" ondragover="window.allowDrop(event)">
-                        </div>
+                        <div class="kanban-cards" ondrop="window.dropExpansao(event)"
+                            ondragover="window.allowDropExpansao(event)"></div>
                     </div>
 
                     <!-- Coluna 5: Fase 3 -->
@@ -153,8 +157,8 @@
                             <h3>Fase 3 (Revestimento)</h3>
                             <span class="kanban-col-count" id="count-fase3">0</span>
                         </div>
-                        <div class="kanban-cards" ondrop="window.drop(event)" ondragover="window.allowDrop(event)">
-                        </div>
+                        <div class="kanban-cards" ondrop="window.dropExpansao(event)"
+                            ondragover="window.allowDropExpansao(event)"></div>
                     </div>
 
                     <!-- Coluna 6: Concluído -->
@@ -163,8 +167,8 @@
                             <h3>Entregue / Concluído</h3>
                             <span class="kanban-col-count" id="count-concluido">0</span>
                         </div>
-                        <div class="kanban-cards" ondrop="window.drop(event)" ondragover="window.allowDrop(event)">
-                        </div>
+                        <div class="kanban-cards" ondrop="window.dropExpansao(event)"
+                            ondragover="window.allowDropExpansao(event)"></div>
                     </div>
                 </div>
             </div>
@@ -356,8 +360,9 @@
         </div>
     </div>
 
-    <!-- O Script foi movido de module para standard com objeto global para evitar erros de renderização -->
+    <!-- Script Module Padrão igual TI -->
     <script type="module" src="js/app.js"></script>
+
 </body>
 
 </html>

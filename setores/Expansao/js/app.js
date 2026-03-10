@@ -1,5 +1,4 @@
 // setores/Expansao/js/app.js
-
 import { db, collection, getDocs, addDoc, updateDoc, doc, deleteDoc } from '../../../js/firebase-config.js';
 
 let currentUser = sessionStorage.getItem('loggedUser') || null;
@@ -9,6 +8,16 @@ let cardAbertoId = null;
 let checklistsCache = [];
 let comentariosCache = [];
 let anexosCache = [];
+
+function showToast(msg, type = 'success') {
+    if (typeof Toastify !== 'undefined') {
+        Toastify({
+            text: msg, duration: 3000, gravity: "top", position: "right",
+            style: { background: type === 'success' ? "var(--sp-pistache)" : (type === 'warning' ? "var(--sp-laranja)" : "var(--sp-red)"), borderRadius: "8px", fontFamily: "Inter" }
+        }).showToast();
+    } else { alert(msg); }
+}
+window.showToast = showToast;
 
 window.toggleDarkMode = function () {
     document.body.classList.toggle('dark-mode');
@@ -22,6 +31,12 @@ if (localStorage.getItem('darkMode') === 'true') {
     localStorage.setItem('darkMode', 'true');
 }
 
+window.logout = function () {
+    sessionStorage.removeItem('loggedUser');
+    sessionStorage.removeItem('userSectors');
+    window.location.href = '../../index.html';
+}
+
 function initApp() {
     if (!currentUser) {
         window.location.href = '../../index.html';
@@ -30,42 +45,38 @@ function initApp() {
 
     document.getElementById('loggedUserName').innerText = currentUser;
 
-    // Injetar Hub button (Correção do loop e seletores p evitar duplicidade DOM)
+    // Injetar Hub button (Idêntico ao TI)
     document.querySelectorAll('.header-actions > div:first-child').forEach(container => {
         if (container.querySelector('.btn-hub')) return;
         const btn = document.createElement('button');
         btn.className = 'btn btn-outline btn-hub';
         btn.style.padding = '6px 10px';
-        btn.title = 'Voltar para o Hub de Setores';
+        btn.title = 'Escolha de Setores';
         btn.innerHTML = '<i class="ph ph-squares-four" style="font-size: 1.2rem;"></i>';
         btn.onclick = () => window.location.href = '../../index.html?hub=1';
         container.insertBefore(btn, container.querySelector('.page-title'));
     });
 
-    window.switchView('obras');
+    window.switchView('dashboard');
     carregarKanbanExpansao();
 }
 
-// Expansão agra conta com Obras, dashboard, tarefas, metapwr
 window.switchView = function (view) {
-    const views = ['dashboard', 'obras', 'tarefas', 'metapwr'];
-    views.forEach(v => {
-        const el = document.getElementById('view-' + v);
-        const nav = document.getElementById('nav-' + v);
-        if (el) el.style.display = 'none';
-        if (nav) nav.classList.remove('active');
-    });
+    document.getElementById('view-dashboard').style.display = 'none';
+    document.getElementById('view-obras').style.display = 'none';
+    document.getElementById('view-tarefas').style.display = 'none';
+    document.getElementById('view-metapwr').style.display = 'none';
+
+    document.getElementById('nav-dashboard').classList.remove('active');
+    document.getElementById('nav-obras').classList.remove('active');
+    document.getElementById('nav-tarefas').classList.remove('active');
+    document.getElementById('nav-metapwr').classList.remove('active');
 
     const currView = document.getElementById(`view-${view}`);
     const currNav = document.getElementById(`nav-${view}`);
 
-    if (currView) currView.style.display = 'flex'; // ou block
+    if (currView) currView.style.display = view === 'obras' ? 'flex' : 'block';
     if (currNav) currNav.classList.add('active');
-
-    // O View obras utiliza flexbox column no full height
-    if (view !== 'obras' && currView) {
-        currView.style.display = 'block';
-    }
 
     if (window.innerWidth <= 768) { window.toggleSidebar(); }
 }
@@ -80,7 +91,6 @@ window.toggleSidebar = function () {
 }
 
 // ================= KANBAN EXPANSÃO ENGINE =====================
-
 async function carregarKanbanExpansao() {
     try {
         const querySnapshot = await getDocs(obrasCollection);
@@ -124,7 +134,7 @@ function renderKanban(obras) {
             if (obra.tag === 'Estética') tagClasses = 'tag-estetica';
 
             const cardHtml = `
-                <div class="kanban-card-item ${isLate ? 'late' : ''}" draggable="true" ondragstart="window.drag(event)" id="card-${obra.id}" data-id="${obra.id}" onclick="window.abrirModalCardExpansao('${obra.id}')">
+                <div class="kanban-card-item ${isLate ? 'late' : ''}" draggable="true" ondragstart="window.dragExpansao(event)" id="card-${obra.id}" data-id="${obra.id}" onclick="window.abrirModalCardExpansao('${obra.id}')">
                     
                     <div class="tags-container">
                         ${obra.tag ? `<span class="tag ${tagClasses}">${obra.tag}</span>` : ''}
@@ -176,7 +186,6 @@ window.filtrarKanban = function () {
 }
 
 // ================= MODAL MANAGER =====================
-
 window.abrirModalCardExpansao = function (id = null) {
     cardAbertoId = id;
     const modal = document.getElementById('modalCardExpansaoObj');
@@ -232,8 +241,6 @@ window.abrirModalCardExpansao = function (id = null) {
             const novoTitulo = prompt("Digite o Título da nova Obra/Manutenção:");
             if (novoTitulo) {
                 document.getElementById('modalCardTitulo').innerText = novoTitulo;
-            } else {
-                return;
             }
         }, 100);
     }
@@ -260,7 +267,7 @@ window.salvarCardExpansao = async function () {
     const custoReal = document.getElementById('modalCustoReal').value;
 
     if (!titulo || !loja) {
-        window.showToast("Preencha Título e Loja", "warning");
+        showToast("Preencha Título e Loja", "warning");
         return;
     }
 
@@ -274,19 +281,19 @@ window.salvarCardExpansao = async function () {
     try {
         if (id) {
             await updateDoc(doc(db, "obras_expansao", id), payload);
-            window.showToast("Obra atualizada", "success");
+            showToast("Obra atualizada", "success");
         } else {
             payload.comentarios = [{
                 texto: "Obra criada no sistema.", dataHora: new Date().toLocaleString('pt-BR'), autor: currentUser
             }];
             await addDoc(obrasCollection, payload);
-            window.showToast("Obra criada", "success");
+            showToast("Obra criada", "success");
         }
         window.fecharModalCardExpansao();
         carregarKanbanExpansao();
     } catch (e) {
         console.error(e);
-        window.showToast("Erro ao salvar", "error");
+        showToast("Erro ao salvar", "error");
     }
 }
 
@@ -295,7 +302,7 @@ window.excluirObra = async function () {
     if (confirm("Tem certeza que deseja excluir esta obra permanentemente?")) {
         try {
             await deleteDoc(doc(db, "obras_expansao", cardAbertoId));
-            window.showToast("Obra excluída.", "success");
+            showToast("Obra excluída.", "success");
             window.fecharModalCardExpansao();
             carregarKanbanExpansao();
         } catch (e) { console.error(e); }
@@ -396,15 +403,15 @@ window.removerAnexo = function (i) {
     renderAnexos();
 }
 
-window.allowDrop = function (ev) {
+window.allowDropExpansao = function (ev) {
     ev.preventDefault();
 }
 
-window.drag = function (ev) {
+window.dragExpansao = function (ev) {
     ev.dataTransfer.setData("card_id", ev.target.dataset.id);
 }
 
-window.drop = async function (ev) {
+window.dropExpansao = async function (ev) {
     ev.preventDefault();
     const dataId = ev.dataTransfer.getData("card_id");
     let targetCol = ev.target.closest('.kanban-col');
@@ -431,26 +438,6 @@ window.drop = async function (ev) {
                 comentarios: coments
             });
         } catch (e) { console.error(e); }
-    }
-}
-
-window.showToast = function (message, type = 'success') {
-    if (typeof Toastify !== 'undefined') {
-        Toastify({
-            text: message,
-            duration: 3000,
-            close: true,
-            gravity: "top",
-            position: "right",
-            style: {
-                background: type === 'success' ? "var(--sp-pistache)" : (type === 'warning' ? "var(--sp-laranja)" : "var(--sp-red)"),
-                color: "#fff",
-                borderRadius: "8px",
-                fontFamily: "Inter, sans-serif"
-            }
-        }).showToast();
-    } else {
-        alert(message);
     }
 }
 
