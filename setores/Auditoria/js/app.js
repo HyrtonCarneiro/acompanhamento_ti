@@ -1,6 +1,14 @@
 // js/app.js da Auditoria
+import { db, collection, getDocs, addDoc, updateDoc, doc, deleteDoc, onSnapshot, query, orderBy, setDoc } from '../../js/firebase.js';
+import { lojasIniciais } from '../../js/data.js';
+
 let currentUser = sessionStorage.getItem('loggedUser') || null;
 let scatterChartInst = null;
+
+// Caches de Auditoria
+let notasCache = [];
+let planejamentoCache = [];
+let planejamentoAbertoId = null;
 
 window.toggleDarkMode = function () {
     document.body.classList.toggle('dark-mode');
@@ -19,6 +27,19 @@ window.logout = function () {
     window.location.href = '../../index.html';
 }
 
+
+function showToast(msg, type = 'success') {
+    try {
+        if (typeof Toastify !== 'undefined') {
+            Toastify({
+                text: msg, duration: 3000, gravity: "top", position: "right",
+                style: { background: type === 'success' ? "var(--sp-pistache)" : (type === 'warning' ? "var(--sp-laranja)" : "var(--sp-red)"), borderRadius: "8px", fontFamily: "Inter" }
+            }).showToast();
+        } else { alert(msg); }
+    } catch (e) { console.error(e); }
+}
+window.showToast = showToast;
+
 function initApp() {
     if (!currentUser) {
         window.location.href = '../../index.html';
@@ -26,6 +47,15 @@ function initApp() {
     }
 
     document.getElementById('loggedUserName').innerText = currentUser;
+
+    // Popular Lojas no Select de Auditoria Online
+    const selectLoja = document.getElementById('audiSelectLoja');
+    if (selectLoja) {
+        selectLoja.innerHTML = '<option value="">Selecione a Loja...</option>';
+        lojasIniciais.forEach(loja => {
+            selectLoja.innerHTML += `<option value="${loja.nome}">${loja.nome}</option>`;
+        });
+    }
 
     // Injetar botão do Hub dinamicamente
     document.querySelectorAll('.header-actions > div:first-child').forEach(container => {
@@ -39,15 +69,27 @@ function initApp() {
         container.insertBefore(btn, container.querySelector('.page-title'));
     });
 
-    window.switchView('dashboard');
+    // Iniciar Listeners do Firebase
+    iniciarListenersAuditoria();
+
+    // Iniciar com uma data preenchida hoje
+    if (document.getElementById('audiDataInput')) {
+        document.getElementById('audiDataInput').valueAsDate = new Date();
+    }
+
+    window.switchView('auditoriaOnline');
 }
 
 window.switchView = function (view) {
     document.getElementById('view-dashboard').style.display = 'none';
+    document.getElementById('view-auditoriaOnline').style.display = 'none';
+    document.getElementById('view-planejamento').style.display = 'none';
     document.getElementById('view-tarefas').style.display = 'none';
     document.getElementById('view-metapwr').style.display = 'none';
 
     document.getElementById('nav-dashboard').classList.remove('active');
+    document.getElementById('nav-auditoriaOnline').classList.remove('active');
+    document.getElementById('nav-planejamento').classList.remove('active');
     document.getElementById('nav-tarefas').classList.remove('active');
     document.getElementById('nav-metapwr').classList.remove('active');
 
@@ -161,6 +203,207 @@ function renderizarGrafico() {
             }
         }
     });
+}
+
+// ============================================
+// LÓGICA DE AUDITORIA (FIREBASE)
+// ============================================
+
+function iniciarListenersAuditoria() {
+    try {
+        // Listener de Notas Históricas
+        const qNotas = query(collection(db, "auditoria_notas"), orderBy("data", "desc"));
+        onSnapshot(qNotas, (snapshot) => {
+            notasCache = [];
+            snapshot.forEach((doc) => {
+                notasCache.push({ id: doc.id, ...doc.data() });
+            });
+            renderizarHistoricoNotas();
+            renderizarTabelaPlanejamento(); // Notas podem afetar a 'Última Auditoria'
+        }, (err) => console.error("Erro Notas:", err));
+
+        // Listener de Planejamento 
+        onSnapshot(collection(db, "auditoria_planejamento"), (snapshot) => {
+            planejamentoCache = [];
+            snapshot.forEach((doc) => {
+                planejamentoCache.push({ id: doc.id, ...doc.data() }); // O ID será o nome da loja
+            });
+            renderizarTabelaPlanejamento();
+        }, (err) => console.error("Erro Planejamento:", err));
+
+    } catch (e) {
+        console.error("Erro ao iniciar listeners auditoria", e);
+    }
+}
+
+// 1. AUDITORIA ONLINE (LANÇAR NOTA)
+window.salvarAuditoriaOnline = async function () {
+    const loja = document.getElementById('audiSelectLoja').value;
+    const data = document.getElementById('audiDataInput').value;
+    const nota = parseFloat(document.getElementById('audiNotaInput').value);
+
+    if (!loja || !data || isNaN(nota) || nota < 0 || nota > 10) {
+        showToast("Preencha loja, data e uma nota válida (0 a 10).", "warning");
+        return;
+    }
+
+    try {
+        await addDoc(collection(db, "auditoria_notas"), {
+            loja: loja,
+            data: data,
+            nota: nota,
+            auditor: currentUser,
+            timestamp: new Date().toISOString()
+        });
+        showToast("Auditoria registrada!", "success");
+        document.getElementById('audiSelectLoja').value = "";
+        document.getElementById('audiNotaInput').value = "";
+    } catch (e) {
+        console.error(e);
+        showToast("Erro ao gravar nota.", "error");
+    }
+}
+
+function renderizarHistoricoNotas() {
+    const tbody = document.getElementById('audiHistoricoBody');
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+    if (notasCache.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="padding: 20px; text-align: center; color: var(--text-muted);">Nenhuma avaliação registrada recente.</td></tr>';
+        return;
+    }
+
+    // Exibir apenas as últimas 30 avaliações para não travar a tabela
+    const relatorio = notasCache.slice(0, 30);
+
+    relatorio.forEach(nota => {
+        const tr = document.createElement('tr');
+        tr.style.borderBottom = "1px solid var(--border)";
+
+        let colorNota = "var(--sp-pistache)";
+        if (nota.nota < 7) colorNota = "var(--sp-red)";
+        else if (nota.nota < 8.5) colorNota = "var(--sp-laranja)";
+
+        // Data Formatter
+        let displayData = nota.data;
+        if (displayData) {
+            const [y, m, d] = displayData.split('-');
+            if (y && m && d) displayData = `${d}/${m}/${y}`;
+        }
+
+        tr.innerHTML = `
+            <td style="padding: 15px; font-size: 0.9rem;">${displayData}</td>
+            <td style="padding: 15px; font-weight: 600; font-size: 0.9rem;">${nota.loja}</td>
+            <td style="padding: 15px; font-size: 0.9rem; color: var(--text-muted);"><i class="ph ph-user"></i> ${nota.auditor}</td>
+            <td style="padding: 15px; font-weight: 700; font-size: 1.1rem; text-align: right; color: ${colorNota};">${nota.nota.toFixed(1)}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+
+// 2. PLANEJAMENTO DE AUDITORIAS (TABELA)
+window.renderizarTabelaPlanejamento = function () {
+    const tbody = document.getElementById('planejamentoTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    const filtro = (document.getElementById('pesquisaPlanejamento')?.value || '').toLowerCase();
+
+    // Cruzar Lojas Base com as Configurações Salvas no Firestore (planejamentoCache)
+    // E capturar a última Data em notasCache para exibir.
+
+    lojasIniciais.forEach(lojaBase => {
+        // Ignorar a Matriz ou exibir, como preferir. Incluiremos.
+
+        // Busca Configuração do Planejamento
+        const cfg = planejamentoCache.find(p => p.id === lojaBase.nome) || {};
+
+        // Busca a Nota mais recente para esta loja
+        const historicoLoja = notasCache.filter(n => n.loja === lojaBase.nome);
+        let ultimaAuditoriaStr = "Nunca";
+        if (historicoLoja.length > 0) {
+            // Como já vem ordenado desc de lá, index 0 é o mais recente
+            const ulData = historicoLoja[0].data;
+            const [y, m, d] = ulData.split('-');
+            ultimaAuditoriaStr = `${d}/${m}/${y}`;
+        }
+
+        // Filtro de Texto
+        if (filtro && !lojaBase.nome.toLowerCase().includes(filtro) && !(cfg.regional || '').toLowerCase().includes(filtro)) {
+            return;
+        }
+
+        const dataProxStr = cfg.dataProxima ? cfg.dataProxima.split('-').reverse().join('/') : '<span style="color:var(--text-muted)">Não agendado</span>';
+        const auditor = cfg.auditor || '<span style="color:var(--text-muted)">A Definir</span>';
+        const regional = cfg.regional || 'N/A';
+
+        const tr = document.createElement('tr');
+        tr.style.borderBottom = "1px solid var(--border)";
+        tr.innerHTML = `
+            <td style="padding: 15px; font-weight: 600; font-size: 0.9rem; color: var(--text-main);">${lojaBase.nome}</td>
+            <td style="padding: 15px; font-size: 0.85rem; color: var(--secondary);"><span style="background: rgba(38,93,124,0.1); padding: 4px 8px; border-radius: 4px;">${regional}</span></td>
+            <td style="padding: 15px; font-size: 0.85rem; font-weight: 500;">${ultimaAuditoriaStr}</td>
+            <td style="padding: 15px; font-size: 0.85rem; font-weight: 600;">${dataProxStr}</td>
+            <td style="padding: 15px; font-size: 0.85rem; color: var(--text-main);"><i class="ph ph-user"></i> ${auditor}</td>
+            <td style="padding: 15px; text-align: center;">
+                <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem;" onclick="window.abrirModalEditPlanejamento('${lojaBase.nome}')">
+                    <i class="ph ph-pencil-simple"></i> Editar Agendamento
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+window.filtrarPlanejamento = function () {
+    renderizarTabelaPlanejamento();
+}
+
+window.abrirModalEditPlanejamento = function (nomeLoja) {
+    planejamentoAbertoId = nomeLoja;
+    document.getElementById('modalPlanLojaNome').innerText = nomeLoja;
+    document.getElementById('modalPlanId').value = nomeLoja;
+
+    // Busca configuração pré-existente se houver
+    const cfg = planejamentoCache.find(p => p.id === nomeLoja) || {};
+
+    document.getElementById('modalPlanDataProx').value = cfg.dataProxima || '';
+    document.getElementById('modalPlanAuditor').value = cfg.auditor || '';
+    document.getElementById('modalPlanNotas').value = cfg.notasInternas || '';
+
+    document.getElementById('modalPlanejamentoObj').classList.add('show');
+}
+
+window.fecharModalEditPlanejamento = function () {
+    document.getElementById('modalPlanejamentoObj').classList.remove('show');
+    planejamentoAbertoId = null;
+}
+
+window.salvarPlanejamento = async function () {
+    if (!planejamentoAbertoId) return;
+
+    const dataProxima = document.getElementById('modalPlanDataProx').value;
+    const auditor = document.getElementById('modalPlanAuditor').value.trim();
+    const notasInternas = document.getElementById('modalPlanNotas').value.trim();
+
+    try {
+        // Usamos setDoc para forçar que o ID do documento seja o NOME da Loja, garantindo update ou create direto.
+        await setDoc(doc(db, "auditoria_planejamento", planejamentoAbertoId), {
+            dataProxima,
+            auditor,
+            notasInternas,
+            regional: 'Nordeste', // Para o MVP manteremos fixo preenchido ou buscaríamos do array,
+            updatedAt: new Date().toISOString()
+        }, { merge: true });
+
+        showToast("Agendamento de Auditoria salvo!", "success");
+        window.fecharModalEditPlanejamento();
+    } catch (e) {
+        console.error(e);
+        showToast("Erro ao salvar planejamento", "error");
+    }
 }
 
 if (currentUser) initApp();
