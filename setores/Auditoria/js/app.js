@@ -1,6 +1,6 @@
 // js/app.js da Auditoria
-import { db, collection, getDocs, addDoc, updateDoc, doc, deleteDoc, onSnapshot, query, orderBy, where } from '../../js/firebase.js';
-import { lojasIniciais } from '../../js/data.js';
+import { db, collection, getDocs, addDoc, updateDoc, doc, deleteDoc, onSnapshot, query, orderBy, where } from '../../../js/firebase.js';
+import { lojasIniciais } from '../../../js/data.js';
 
 let currentUser = sessionStorage.getItem('loggedUser') || null;
 let scatterChartInst = null;
