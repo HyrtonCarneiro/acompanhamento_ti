@@ -2,7 +2,6 @@
 import { db, collection, addDoc, getDocs, updateDoc, doc, deleteDoc, query, where } from './firebase.js';
 
 let currentUser = sessionStorage.getItem('loggedUser') || null;
-let authMode = 'login';
 let allUsersCache = [];
 
 function showToast(msg, type = 'success') {
@@ -12,84 +11,70 @@ function showToast(msg, type = 'success') {
     }).showToast();
 }
 
-window.switchAuth = function(mode) {
-    authMode = mode;
-    document.getElementById('tabLogin').classList.toggle('active', mode === 'login');
-    document.getElementById('tabRegister').classList.toggle('active', mode === 'register');
-    document.getElementById('authTitle').innerText = mode === 'login' ? 'Acesso ao Sistema' : 'Criar Credencial';
-}
-
-window.handleAuth = async function() {
+window.handleAuth = async function () {
     const user = document.getElementById('userInput').value.trim();
     const pass = document.getElementById('passInput').value.trim();
 
-    if(!user || !pass) return showToast("Preencha todos os campos", "error");
+    if (!user || !pass) return showToast("Preencha todos os campos", "error");
 
     try {
         const q = query(collection(db, "users"), where("user", "==", user));
         const querySnapshot = await getDocs(q);
 
-        if (authMode === 'register') {
-            if (!querySnapshot.empty) return showToast("Usuário indisponível", "error");
-            await addDoc(collection(db, "users"), { user, pass, setores_permitidos: ["TI"] });
-            showToast("Conta criada com sucesso!");
-            window.switchAuth('login');
-        } else {
-            if (querySnapshot.empty) {
-                if(user === 'admin' && pass === '$@np@010') {
-                    const allSectors = ["TI", "Auditoria", "Controladoria", "Fiscal", "Financeiro", "Marketing", "Gente_Gestao", "Operacao", "Varejo"];
-                    await addDoc(collection(db, "users"), { user: 'admin', pass: '$@np@010', setores_permitidos: allSectors });
-                    sessionStorage.setItem('loggedUser', user);
-                    sessionStorage.setItem('userSectors', JSON.stringify(allSectors));
-                    currentUser = user;
-                    initApp();
-                } else {
-                    showToast("Credenciais inválidas", "error");
-                }
-                return;
+        if (querySnapshot.empty) {
+            if (user === 'admin' && pass === '$@np@010') {
+                const allSectors = ["TI", "Auditoria", "Controladoria", "Fiscal", "Financeiro", "Marketing", "Gente_Gestao", "Operacao", "Varejo"];
+                await addDoc(collection(db, "users"), { user: 'admin', pass: '$@np@010', setores_permitidos: allSectors });
+                sessionStorage.setItem('loggedUser', user);
+                sessionStorage.setItem('userSectors', JSON.stringify(allSectors));
+                currentUser = user;
+                initApp();
+            } else {
+                showToast("Credenciais inválidas", "error");
             }
-            
-            const docRef = querySnapshot.docs[0];
-            const userData = docRef.data();
-            
-            // Corrige senha do admin se ele já existia mas com a credencial antiga
-            if(user === 'admin' && pass === '$@np@010' && userData.pass !== '$@np@010') {
-                 await updateDoc(doc(db, "users", docRef.id), { pass: '$@np@010' });
-                 userData.pass = '$@np@010';
-            }
-            
-            if (userData.pass === pass) { 
-                let sectors = userData.setores_permitidos || ["TI"];
-                if(user === 'admin') {
-                    sectors = ["TI", "Auditoria", "Controladoria", "Fiscal", "Financeiro", "Marketing", "Gente_Gestao", "Operacao", "Varejo"];
-                }
-                sessionStorage.setItem('userSectors', JSON.stringify(sectors));
-                sessionStorage.setItem('loggedUser', user); 
-                currentUser = user; 
-                initApp(); 
-            } else { 
-                showToast("Credenciais inválidas", "error"); 
-            }
+            return;
         }
-    } catch(e) {
+
+        const docRef = querySnapshot.docs[0];
+        const userData = docRef.data();
+
+        // Corrige senha do admin se ele já existia mas com a credencial antiga
+        if (user === 'admin' && pass === '$@np@010' && userData.pass !== '$@np@010') {
+            await updateDoc(doc(db, "users", docRef.id), { pass: '$@np@010' });
+            userData.pass = '$@np@010';
+        }
+
+        if (userData.pass === pass) {
+            let sectors = userData.setores_permitidos || ["TI"];
+            if (user === 'admin') {
+                sectors = ["TI", "Auditoria", "Controladoria", "Fiscal", "Financeiro", "Marketing", "Gente_Gestao", "Operacao", "Varejo"];
+            }
+            sessionStorage.setItem('userSectors', JSON.stringify(sectors));
+            sessionStorage.setItem('loggedUser', user);
+            currentUser = user;
+            initApp();
+        } else {
+            showToast("Credenciais inválidas", "error");
+        }
+    } catch (e) {
         console.error(e);
         showToast("Erro na autenticação", "error");
     }
 }
 
-window.logout = function() { 
-    sessionStorage.removeItem('loggedUser'); 
+window.logout = function () {
+    sessionStorage.removeItem('loggedUser');
     sessionStorage.removeItem('userSectors');
-    location.reload(); 
+    location.reload();
 }
 
 function initApp() {
     document.getElementById('login-container').style.display = 'none';
-    
+
     let sectors = [];
     try {
         sectors = JSON.parse(sessionStorage.getItem('userSectors')) || ["TI"];
-    } catch(e) {
+    } catch (e) {
         sectors = ["TI"];
     }
 
@@ -99,11 +84,11 @@ function initApp() {
     }
 
     document.getElementById('hub-container').style.display = 'block';
-    
+
     const allHubSectors = ["TI", "Auditoria", "Controladoria", "Fiscal", "Financeiro", "Marketing", "Gente_Gestao", "Operacao", "Varejo"];
     allHubSectors.forEach(sec => {
         const card = document.getElementById('hub-card-' + sec);
-        if(card) {
+        if (card) {
             if (sectors.includes(sec) || currentUser === 'admin') {
                 card.style.display = 'flex';
             } else {
@@ -119,12 +104,12 @@ function initApp() {
     }
 }
 
-window.goToSector = function(sector) {
+window.goToSector = function (sector) {
     window.location.href = `./setores/${sector}/index.html`;
 }
 
 // =================== ADMIN PANEL ===================
-window.abrirModalAdmin = async function() {
+window.abrirModalAdmin = async function () {
     const el = document.getElementById('modalAdminUsers');
     el.style.display = 'flex';
     // Timeout to allow display:flex to apply before opacity transition
@@ -132,7 +117,7 @@ window.abrirModalAdmin = async function() {
     carregarUsuariosAdmin();
 }
 
-window.fecharModalAdmin = function() {
+window.fecharModalAdmin = function () {
     const el = document.getElementById('modalAdminUsers');
     el.classList.remove('show');
     setTimeout(() => { el.style.display = 'none'; }, 200);
@@ -141,23 +126,23 @@ window.fecharModalAdmin = function() {
 async function carregarUsuariosAdmin() {
     const listHtml = document.getElementById('adminUsersList');
     listHtml.innerHTML = '<p style="padding:20px; text-align:center;">Carregando usuários...</p>';
-    
+
     try {
         const querySnapshot = await getDocs(collection(db, "users"));
         allUsersCache = [];
         querySnapshot.forEach(doc => {
             allUsersCache.push({ id: doc.id, ...doc.data() });
         });
-        
+
         // Põe o admin em primeiro
-        allUsersCache.sort((a,b) => {
-            if(a.user === 'admin') return -1;
-            if(b.user === 'admin') return 1;
+        allUsersCache.sort((a, b) => {
+            if (a.user === 'admin') return -1;
+            if (b.user === 'admin') return 1;
             return a.user.localeCompare(b.user);
         });
-        
+
         renderAdminUsersList();
-    } catch(e) {
+    } catch (e) {
         console.error(e);
         listHtml.innerHTML = '<p style="padding:20px; color:var(--danger); text-align:center;">Erro ao carregar usuários do Firebase.</p>';
     }
@@ -165,22 +150,22 @@ async function carregarUsuariosAdmin() {
 
 function renderAdminUsersList() {
     const listHtml = document.getElementById('adminUsersList');
-    if(!listHtml) return;
+    if (!listHtml) return;
     listHtml.innerHTML = '';
-    
+
     const termo = document.getElementById('buscaUsuarioAdmin') ? document.getElementById('buscaUsuarioAdmin').value.toLowerCase().trim() : '';
     const allSectors = ["TI", "Auditoria", "Controladoria", "Fiscal", "Financeiro", "Marketing", "Gente_Gestao", "Operacao", "Varejo"];
-    
+
     let usuariosFiltrados = allUsersCache.filter(u => u.user.toLowerCase().includes(termo));
-    
-    if(usuariosFiltrados.length === 0) {
+
+    if (usuariosFiltrados.length === 0) {
         listHtml.innerHTML = '<p style="padding:20px; text-align:center;">Nenhum usuário encontrado.</p>';
         return;
     }
 
     usuariosFiltrados.forEach(u => {
         const currentPerms = Array.isArray(u.setores_permitidos) ? u.setores_permitidos : ["TI"];
-        
+
         let checksHtml = allSectors.map(sec => {
             const isChecked = currentPerms.includes(sec);
             const isAdminStr = u.user === 'admin' ? 'disabled' : '';
@@ -197,8 +182,9 @@ function renderAdminUsersList() {
         d.style.marginBottom = '15px';
         d.style.borderRadius = '8px';
         d.style.background = 'var(--panel-bg)';
-        
+
         const adminBadge = u.user === 'admin' ? '<span class="badge" style="background:var(--primary); color:white;">Super Admin</span>' : '';
+        const btnAlterarSenha = `<button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.8rem; margin-right: 5px;" onclick="window.alterarSenhaUsuario('${u.id}', '${u.user}')"><i class="ph ph-key"></i> Senha</button>`;
         const btnDelete = u.user !== 'admin' ? `<button class="btn btn-danger" style="padding: 4px 8px; font-size: 0.8rem;" onclick="window.deletarUsuario('${u.id}', '${u.user}')"><i class="ph ph-trash"></i> Excluir</button>` : '';
 
         d.innerHTML = `
@@ -207,7 +193,10 @@ function renderAdminUsersList() {
                     <span><i class="ph ph-user"></i> ${u.user}</span>
                     ${adminBadge}
                 </div>
-                ${btnDelete}
+                <div>
+                    ${btnAlterarSenha}
+                    ${btnDelete}
+                </div>
             </div>
             <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap:10px; margin-bottom:15px;">
                 ${checksHtml}
@@ -218,37 +207,73 @@ function renderAdminUsersList() {
     });
 }
 
-window.salvarPermissoesUsuario = async function(userId) {
+window.salvarPermissoesUsuario = async function (userId) {
     const checkboxes = document.querySelectorAll('.chk-sector-' + userId);
     let novasPermissoes = [];
     checkboxes.forEach(chk => {
-        if(chk.checked) novasPermissoes.push(chk.value);
+        if (chk.checked) novasPermissoes.push(chk.value);
     });
-    
-    if(novasPermissoes.length === 0) return showToast("Selecione pelo menos um setor", "error");
-    
+
+    if (novasPermissoes.length === 0) return showToast("Selecione pelo menos um setor", "error");
+
     try {
         await updateDoc(doc(db, "users", userId), {
             setores_permitidos: novasPermissoes
         });
         showToast("Permissões atualizadas com sucesso!");
-    } catch(e) {
+    } catch (e) {
         console.error(e);
         showToast("Erro ao atualizar permissões", "error");
     }
 }
 
-window.deletarUsuario = async function(userId, userName) {
-    if(!confirm(`Tem certeza que deseja apagar o usuário '${userName}' permanentemente?`)) return;
-    
+window.deletarUsuario = async function (userId, userName) {
+    if (!confirm(`Tem certeza que deseja apagar o usuário '${userName}' permanentemente?`)) return;
+
     try {
         await deleteDoc(doc(db, "users", userId));
         showToast("Usuário deletado");
         carregarUsuariosAdmin(); // Refresh da lista
-    } catch(e) {
+    } catch (e) {
         console.error(e);
         showToast("Erro ao deletar usuário", "error");
     }
 }
 
-if(currentUser) initApp();
+window.criarUsuarioAdmin = async function () {
+    const user = document.getElementById('novoUsuarioAdmin').value.trim();
+    const pass = document.getElementById('novaSenhaAdmin').value.trim();
+
+    if (!user || !pass) return showToast("Preencha usuário e senha", "error");
+
+    try {
+        const q = query(collection(db, "users"), where("user", "==", user));
+        const qs = await getDocs(q);
+        if (!qs.empty) return showToast("Usuário já existe", "error");
+
+        await addDoc(collection(db, "users"), { user, pass, setores_permitidos: ["TI"] });
+        showToast("Usuário criado com sucesso!");
+        document.getElementById('novoUsuarioAdmin').value = '';
+        document.getElementById('novaSenhaAdmin').value = '';
+        carregarUsuariosAdmin();
+    } catch (e) {
+        console.error(e);
+        showToast("Erro ao criar usuário", "error");
+    }
+}
+
+window.alterarSenhaUsuario = async function (userId, userName) {
+    const novaSenha = prompt(`Digite a nova senha para o usuário '${userName}':`);
+    if (novaSenha === null) return; // cancelou
+    if (!novaSenha.trim()) return showToast("Senha não pode ser vazia", "error");
+
+    try {
+        await updateDoc(doc(db, "users", userId), { pass: novaSenha.trim() });
+        showToast("Senha alterada com sucesso!");
+    } catch (e) {
+        console.error(e);
+        showToast("Erro ao alterar senha", "error");
+    }
+}
+
+if (currentUser) initApp();
