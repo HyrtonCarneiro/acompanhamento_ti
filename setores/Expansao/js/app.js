@@ -446,7 +446,7 @@ window.abrirModalCardExpansao = function (id = null) {
         const modal = document.getElementById('modalCardExpansaoObj');
         if (!modal) return;
 
-        // Limpar modal
+        // Limpar tudo
         document.getElementById('modalCardId').value = '';
         if (document.getElementById('modalCardTituloInput')) document.getElementById('modalCardTituloInput').value = '';
         document.getElementById('modalCardLoja').value = '';
@@ -458,6 +458,14 @@ window.abrirModalCardExpansao = function (id = null) {
         document.getElementById('modalDataFim').value = '';
         document.getElementById('modalCustoPrev').value = '';
         document.getElementById('modalCustoReal').value = '';
+        if (document.getElementById('modalNovoAnexoURL')) document.getElementById('modalNovoAnexoURL').value = '';
+        if (document.getElementById('novoChecklistItemInput')) document.getElementById('novoChecklistItemInput').value = '';
+        if (document.getElementById('novoComentarioCard')) document.getElementById('novoComentarioCard').value = '';
+
+        document.getElementById('displayCardId').textContent = 'Novo Workflow';
+        document.getElementById('displayCardCriador').textContent = window.currentUser || 'Sistema';
+        if (document.getElementById('modalChecklistPercent')) document.getElementById('modalChecklistPercent').textContent = '0%';
+        if (document.getElementById('modalChecklistProgress')) document.getElementById('modalChecklistProgress').style.width = '0%';
 
         checklistsCache = [];
         comentariosCache = [];
@@ -472,6 +480,9 @@ window.abrirModalCardExpansao = function (id = null) {
             const obra = obrasCache.find(o => o.id === id);
             if (obra) {
                 document.getElementById('modalCardId').value = obra.id;
+                document.getElementById('displayCardId').textContent = obra.id.substring(0, 8).toUpperCase();
+                document.getElementById('displayCardCriador').textContent = obra.autor || 'Sistema';
+
                 if (document.getElementById('modalCardTituloInput')) document.getElementById('modalCardTituloInput').value = obra.titulo;
                 document.getElementById('modalCardLoja').value = obra.loja;
                 document.getElementById('modalCardStatus').value = obra.status;
@@ -588,6 +599,8 @@ function renderChecklists() {
         const perc = checklistsCache.length > 0 ? Math.round((concluidos / checklistsCache.length) * 100) : 0;
         const progBar = document.getElementById('modalChecklistProgress');
         if (progBar) progBar.style.width = `${perc}%`;
+        const percText = document.getElementById('modalChecklistPercent');
+        if (percText) percText.textContent = `${perc}%`;
     } catch (e) { console.error(e); }
 }
 

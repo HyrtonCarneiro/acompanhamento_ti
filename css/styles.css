@@ -1136,8 +1136,95 @@ textarea:focus {
 }
 
 /* Modal Expansão Checklists Scroll */
-#modalChecklistItensContainer {
-    max-height: 200px;
+#modalChecklistItensContainer,
+#modalComentariosContainer {
+    max-height: 250px;
     overflow-y: auto;
-    padding-right: 5px;
+    padding-right: 8px;
+}
+
+/* Custom Scrollbar para o Modal */
+#modalCardExpansaoObj .modal-content::-webkit-scrollbar,
+#modalChecklistItensContainer::-webkit-scrollbar,
+#modalComentariosContainer::-webkit-scrollbar {
+    width: 6px;
+}
+
+#modalCardExpansaoObj .modal-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#modalCardExpansaoObj .modal-content::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 10px;
+}
+
+/* Radio Tags Estilizadas */
+.tags-container label {
+    transition: all 0.2s ease;
+    border: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.tags-container label:hover {
+    border-color: var(--primary);
+    transform: translateY(-1px);
+}
+
+.tags-container input[type="radio"] {
+    display: none;
+}
+
+.tags-container label:has(input[type="radio"]:checked) {
+    border-color: var(--primary);
+    background: rgba(var(--primary-rgb), 0.1);
+    box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.1);
+}
+
+.dark-mode .tags-container label:has(input[type="radio"]:checked) {
+    background: rgba(var(--primary-rgb), 0.2);
+}
+
+/* Inputs e Seletores Premium */
+#modalCardExpansaoObj input,
+#modalCardExpansaoObj select,
+#modalCardExpansaoObj textarea {
+    transition: all 0.2s ease;
+    border: 1.5px solid var(--border);
+}
+
+#modalCardExpansaoObj input:focus,
+#modalCardExpansaoObj select:focus,
+#modalCardExpansaoObj textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+    outline: none;
+}
+
+/* Background Glassmorphism no Dark Mode */
+.dark-mode #modalCardExpansaoObj .modal-content {
+    background: rgba(40, 30, 20, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.dark-mode #modalCardExpansaoObj .modal-header {
+    background: rgba(40, 30, 20, 0.8);
+}
+
+/* Animação de Entrada do Modal */
+#modalCardExpansaoObj.show .modal-content {
+    animation: modalAppear 0.4s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+
+@keyframes modalAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
 }
