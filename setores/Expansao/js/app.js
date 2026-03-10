@@ -404,15 +404,13 @@ window.deletarProjetoExp = async function (id) {
 window.abrirModalEquipeExp = function () {
     const modal = document.getElementById('modalEquipeObj');
     if (!modal) return;
-    modal.style.display = 'flex';
-    modal.classList.add('active');
+    modal.classList.add('show');
     renderListaMembrosExpModal();
 }
 window.fecharModalEquipeExp = function () {
     const modal = document.getElementById('modalEquipeObj');
     if (modal) {
-        modal.classList.remove('active');
-        setTimeout(() => modal.style.display = 'none', 300);
+        modal.classList.remove('show');
     }
 }
 function renderListaMembrosExpModal() {
@@ -498,13 +496,13 @@ window.abrirModalCardExpansao = function (id = null) {
             }
         }
 
-        modal.classList.add('active');
+        modal.classList.add('show');
     } catch (e) { console.error("Erro abrir modal: ", e); }
 }
 
 window.fecharModalCardExpansao = function () {
     const modal = document.getElementById('modalCardExpansaoObj');
-    if (modal) modal.classList.remove('active');
+    if (modal) modal.classList.remove('show');
     cardAbertoId = null;
 }
 
