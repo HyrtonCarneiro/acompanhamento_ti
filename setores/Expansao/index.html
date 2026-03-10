@@ -106,21 +106,28 @@
                         Novo Job / Obra</button>
                 </div>
 
-                <!-- Toolbar Filtros -->
-                <div class="toolbar" style="margin-bottom: 20px; display: flex; gap: 15px;">
-                    <div class="search-wrapper" style="flex: 2;">
+                <div class="toolbar" style="margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap;">
+                    <div class="search-wrapper" style="flex: 2; min-width: 250px;">
                         <i class="ph ph-magnifying-glass"></i>
                         <input type="text" id="filtroKanbanBusca" placeholder="Pesquisar por Título ou Loja..."
                             oninput="window.filtrarKanban()">
                     </div>
-                    <div style="flex: 1; min-width: 200px;">
+                    <div style="flex: 1; min-width: 150px;">
+                        <select id="filtroKanbanRegional" onchange="window.filtrarKanban()"
+                            style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-color); color: var(--text-main);">
+                            <option value="">Todas as Regionais</option>
+                            <!-- Regionais populadas via JS -->
+                        </select>
+                    </div>
+                    <div style="flex: 1; min-width: 150px;">
                         <select id="filtroKanbanTag" onchange="window.filtrarKanban()"
-                            style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border);">
+                            style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-color); color: var(--text-main);">
                             <option value="">Todas as Tags</option>
                             <option value="Urgente">Urgente</option>
-                            <option value="Expansão">Nova Loja / Expansão</option>
-                            <option value="Preventiva">Manutenção Preventiva</option>
-                            <option value="Estética">Estética / Retrofit</option>
+                            <option value="Nova Loja">Nova Loja</option>
+                            <option value="Obras">Obras</option>
+                            <option value="Manutenção">Manutenção</option>
+                            <option value="Retrofit">Retrofit</option>
                         </select>
                     </div>
                 </div>
@@ -129,8 +136,8 @@
                 <div class="kanban-board" id="expansaoBoard">
                     <!-- Coluna 1: Backlog -->
                     <div class="kanban-col" id="col-backlog">
-                        <div class="kanban-col-header">
-                            <h3>Backlog & Standby</h3>
+                        <div class="kanban-col-header" style="padding: 10px 15px;">
+                            <h3 style="font-size: 0.9rem;">Backlog & Standby</h3>
                             <span class="kanban-col-count" id="count-backlog">0</span>
                         </div>
                         <div class="kanban-cards" ondrop="window.dropExpansao(event)"
@@ -141,8 +148,8 @@
 
                     <!-- Coluna 2: Planejamento -->
                     <div class="kanban-col" id="col-planejamento">
-                        <div class="kanban-col-header">
-                            <h3>Planej. / Projetos</h3>
+                        <div class="kanban-col-header" style="padding: 10px 15px;">
+                            <h3 style="font-size: 0.9rem;">Planej. / Projetos</h3>
                             <span class="kanban-col-count" id="count-planejamento">0</span>
                         </div>
                         <div class="kanban-cards" ondrop="window.dropExpansao(event)"
@@ -151,8 +158,8 @@
 
                     <!-- Coluna 3: Fase 1 -->
                     <div class="kanban-col" id="col-fase1">
-                        <div class="kanban-col-header">
-                            <h3>Fase 1 (Mobilização)</h3>
+                        <div class="kanban-col-header" style="padding: 10px 15px;">
+                            <h3 style="font-size: 0.9rem;">Fase 1 (Mobilização)</h3>
                             <span class="kanban-col-count" id="count-fase1">0</span>
                         </div>
                         <div class="kanban-cards" ondrop="window.dropExpansao(event)"
@@ -161,8 +168,8 @@
 
                     <!-- Coluna 4: Fase 2 -->
                     <div class="kanban-col" id="col-fase2">
-                        <div class="kanban-col-header">
-                            <h3>Fase 2 (Instalações)</h3>
+                        <div class="kanban-col-header" style="padding: 10px 15px;">
+                            <h3 style="font-size: 0.9rem;">Fase 2 (Instalações)</h3>
                             <span class="kanban-col-count" id="count-fase2">0</span>
                         </div>
                         <div class="kanban-cards" ondrop="window.dropExpansao(event)"
@@ -171,8 +178,8 @@
 
                     <!-- Coluna 5: Fase 3 -->
                     <div class="kanban-col" id="col-fase3">
-                        <div class="kanban-col-header">
-                            <h3>Fase 3 (Revestimento)</h3>
+                        <div class="kanban-col-header" style="padding: 10px 15px;">
+                            <h3 style="font-size: 0.9rem;">Fase 3 (Acabamento)</h3>
                             <span class="kanban-col-count" id="count-fase3">0</span>
                         </div>
                         <div class="kanban-cards" ondrop="window.dropExpansao(event)"
@@ -181,8 +188,8 @@
 
                     <!-- Coluna 6: Concluído -->
                     <div class="kanban-col" id="col-concluido">
-                        <div class="kanban-col-header">
-                            <h3>Entregue / Concluído</h3>
+                        <div class="kanban-col-header" style="padding: 10px 15px;">
+                            <h3 style="font-size: 0.9rem;">Obra Concluída</h3>
                             <span class="kanban-col-count" id="count-concluido">0</span>
                         </div>
                         <div class="kanban-cards" ondrop="window.dropExpansao(event)"
@@ -345,6 +352,13 @@
                                 </label>
                                 <label
                                     style="cursor: pointer; display: flex; align-items: center; gap: 8px; background: var(--bg-color); padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border); position: relative;">
+                                    <input type="radio" name="modalTagExp" value="Nova Loja"
+                                        style="opacity: 0; position: absolute;">
+                                    <span class="tag tag-novaloja" style="margin:0; pointer-events: none;">Nova
+                                        Loja</span>
+                                </label>
+                                <label
+                                    style="cursor: pointer; display: flex; align-items: center; gap: 8px; background: var(--bg-color); padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border); position: relative;">
                                     <input type="radio" name="modalTagExp" value="Obras"
                                         style="opacity: 0; position: absolute;">
                                     <span class="tag tag-obras" style="margin:0; pointer-events: none;">Obras</span>
@@ -363,6 +377,31 @@
                                     <span class="tag tag-retrofit"
                                         style="margin:0; pointer-events: none;">Retrofit</span>
                                 </label>
+                            </div>
+                        </div>
+
+                        <!-- Seção de Loja (Com Lógica Dinâmica) -->
+                        <div>
+                            <label
+                                style="display: block; margin-bottom: 8px; font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Unidade
+                                / Loja Alvo</label>
+
+                            <!-- Select para Lojas Existentes -->
+                            <div id="containerLojaExistente">
+                                <select id="modalCardLoja"
+                                    style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-color); color: var(--text-main); font-weight: 500;">
+                                    <option value="">Selecione a Loja...</option>
+                                    <!-- Options serão carregadas via JS -->
+                                </select>
+                            </div>
+
+                            <!-- Input para Nova Loja -->
+                            <div id="containerNovaLoja" style="display: none;">
+                                <input type="text" id="modalCardNovaLojaInput"
+                                    placeholder="Digite o nome da nova unidade..."
+                                    style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-color); color: var(--text-main); font-weight: 500;">
+                                <p style="font-size: 0.75rem; color: var(--accent); margin-top: 5px;"><i
+                                        class="ph ph-info"></i> Identificamos que é uma nova unidade.</p>
                             </div>
                         </div>
 

@@ -1059,24 +1059,22 @@ textarea:focus {
 /* TAREFAS E KANBAN STYLES */
 .kanban-board {
     display: flex;
-    gap: 20px;
+    gap: 10px;
     height: calc(100vh - 160px);
-    /* Ocupa tudo menos os headers e margens */
-    min-height: 500px;
     overflow-x: auto;
-    padding-bottom: 10px;
+    padding: 10px 5px;
     width: 100%;
 }
 
 .kanban-col {
-    background: rgba(220, 215, 200, 0.3);
-    border-radius: 12px;
-    min-width: 300px;
+    background: rgba(220, 215, 200, 0.2);
+    border-radius: 10px;
+    min-width: 240px;
     flex: 1;
     display: flex;
     flex-direction: column;
     height: 100%;
-    border: 1px dashed var(--border);
+    border: 1px solid var(--border);
 }
 
 .dark-mode .kanban-col {
@@ -1117,13 +1115,13 @@ textarea:focus {
 
 .kanban-card-item {
     background: var(--surface);
-    padding: 15px;
+    padding: 12px;
     border-radius: 8px;
     border: 1px solid var(--border);
     border-left: 4px solid var(--border);
     cursor: grab;
     transition: 0.2s;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .kanban-card-item:hover {
@@ -1179,6 +1177,12 @@ textarea:focus {
 .tag-urgente {
     background-color: var(--sp-red);
 }
+
+.tag-novaloja {
+    background-color: #00bcd4;
+}
+
+/* Ciano para Nova Loja */
 
 .tag-obras {
     background-color: var(--sp-aoleite);

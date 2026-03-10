@@ -69,19 +69,64 @@ function initApp() {
         window.switchView('dashboard');
         carregarKanbanExpansao();
         iniciarOuvintesTarefas();
+        popularFiltroRegionaisExpansao();
         popularSelectLojasExpansao();
+        configurarOuvinteTagsModal();
     } catch (e) {
         console.error("ERRO CRÍTICO NO INITAPP:", e);
         showToast("Erro ao iniciar a tela. " + e.message, "error");
     }
 }
 
+function popularFiltroRegionaisExpansao() {
+    const sel = document.getElementById('filtroKanbanRegional');
+    if (!sel) return;
+
+    // Extrair regionais únicas de lojasIniciais
+    const regionais = [...new Set(lojasIniciais.map(l => l.estado))].sort();
+
+    sel.innerHTML = '<option value="">Todas as Regionais</option>';
+    regionais.forEach(reg => {
+        sel.innerHTML += `<option value="${reg}">${reg}</option>`;
+    });
+}
+
+function configurarOuvinteTagsModal() {
+    const container = document.querySelector('.tags-container');
+    if (!container) return;
+
+    container.addEventListener('change', (e) => {
+        if (e.target.name === 'modalTagExp') {
+            const isNovaLoja = e.target.value === 'Nova Loja';
+            document.getElementById('containerLojaExistente').style.display = isNovaLoja ? 'none' : 'block';
+            document.getElementById('containerNovaLoja').style.display = isNovaLoja ? 'block' : 'none';
+
+            // Se for Nova Loja, limpa o select para não ter conflito visual
+            if (isNovaLoja) document.getElementById('modalCardLoja').value = '';
+            else document.getElementById('modalCardNovaLojaInput').value = '';
+        }
+    });
+}
+
 function popularSelectLojasExpansao() {
     const sel = document.getElementById('modalCardLoja');
     if (!sel) return;
     sel.innerHTML = '<option value="">(Selecione a Loja)</option>';
-    lojasIniciais.sort((a, b) => a.nome.localeCompare(b.nome)).forEach(l => {
-        sel.innerHTML += `<option value="${l.nome}">${l.estado} - ${l.nome}</option>`;
+
+    // Organizar por Regional e depois por Nome
+    const lojasOrdenadas = [...lojasIniciais].sort((a, b) => {
+        if (a.estado !== b.estado) return a.estado.localeCompare(b.estado);
+        return a.nome.localeCompare(b.nome);
+    });
+
+    let currentReg = '';
+    lojasOrdenadas.forEach(l => {
+        if (l.estado !== currentReg) {
+            currentReg = l.estado;
+            // Opcionalmente adicionar um optgroup ou apenas um divisor visual
+            sel.innerHTML += `<option disabled style="background: var(--border); color: #fff; font-weight: bold;">--- REGIONAL ${currentReg} ---</option>`;
+        }
+        sel.innerHTML += `<option value="${l.nome}">${l.nome}</option>`;
     });
 }
 
@@ -162,6 +207,7 @@ function renderKanban(obras) {
 
                 let tagClasses = '';
                 if (obra.tag === 'Urgente') tagClasses = 'tag-urgente';
+                if (obra.tag === 'Nova Loja') tagClasses = 'tag-novaloja';
                 if (obra.tag === 'Obras') tagClasses = 'tag-obras';
                 if (obra.tag === 'Manutenção') tagClasses = 'tag-manutencao';
                 if (obra.tag === 'Retrofit') tagClasses = 'tag-retrofit';
@@ -209,16 +255,26 @@ window.filtrarKanban = function () {
     try {
         const termoEl = document.getElementById('filtroKanbanBusca');
         const tagFiltroEl = document.getElementById('filtroKanbanTag');
-        if (!termoEl || !tagFiltroEl) return;
+        const regionalFiltroEl = document.getElementById('filtroKanbanRegional');
+        if (!termoEl || !tagFiltroEl || !regionalFiltroEl) return;
 
         const termo = termoEl.value.toLowerCase().trim();
         const tagFiltro = tagFiltroEl.value;
+        const regFiltro = regionalFiltroEl.value;
 
         let filtradas = obrasCache.filter(o => {
             const tituloMatch = (o.titulo || '').toLowerCase().includes(termo);
             const lojaMatch = (o.loja || '').toLowerCase().includes(termo);
             const matchTag = tagFiltro ? o.tag === tagFiltro : true;
-            return (tituloMatch || lojaMatch) && matchTag;
+
+            // Lógica para regional: precisamos achar a regional da loja no data.js
+            let matchReg = true;
+            if (regFiltro) {
+                const lojaInfo = lojasIniciais.find(l => l.nome === o.loja);
+                matchReg = lojaInfo ? lojaInfo.estado === regFiltro : false;
+            }
+
+            return (tituloMatch || lojaMatch) && matchTag && matchReg;
         });
 
         renderKanban(filtradas);
@@ -450,7 +506,13 @@ window.abrirModalCardExpansao = function (id = null) {
         document.getElementById('modalCardId').value = '';
         if (document.getElementById('modalCardTituloInput')) document.getElementById('modalCardTituloInput').value = '';
         document.getElementById('modalCardLoja').value = '';
+        document.getElementById('modalCardNovaLojaInput').value = '';
         document.getElementById('modalCardStatus').value = 'backlog';
+
+        // Resetar visibilidade da loja (Retrofit é default)
+        document.getElementById('containerLojaExistente').style.display = 'block';
+        document.getElementById('containerNovaLoja').style.display = 'none';
+
         if (document.querySelector('input[name="modalTagExp"][value="Retrofit"]')) {
             document.querySelector('input[name="modalTagExp"][value="Retrofit"]').checked = true;
         }
@@ -483,8 +545,16 @@ window.abrirModalCardExpansao = function (id = null) {
                 document.getElementById('displayCardId').textContent = obra.id.substring(0, 8).toUpperCase();
                 document.getElementById('displayCardCriador').textContent = obra.autor || 'Sistema';
 
-                if (document.getElementById('modalCardTituloInput')) document.getElementById('modalCardTituloInput').value = obra.titulo;
-                document.getElementById('modalCardLoja').value = obra.loja;
+                if (obra.tag === 'Nova Loja') {
+                    document.getElementById('modalCardNovaLojaInput').value = obra.loja;
+                    document.getElementById('containerLojaExistente').style.display = 'none';
+                    document.getElementById('containerNovaLoja').style.display = 'block';
+                } else {
+                    document.getElementById('modalCardLoja').value = obra.loja;
+                    document.getElementById('containerLojaExistente').style.display = 'block';
+                    document.getElementById('containerNovaLoja').style.display = 'none';
+                }
+
                 document.getElementById('modalCardStatus').value = obra.status;
 
                 const radioTag = document.querySelector(`input[name="modalTagExp"][value="${obra.tag || 'Retrofit'}"]`);
@@ -521,8 +591,8 @@ window.salvarCardExpansao = async function () {
     try {
         const id = document.getElementById('modalCardId').value;
         const tituloEl = document.getElementById('modalCardTituloInput');
-        const titulo = tituloEl ? tituloEl.value.trim() : '';
-        const loja = document.getElementById('modalCardLoja').value;
+        const isNovaLoja = tag === 'Nova Loja';
+        const loja = isNovaLoja ? document.getElementById('modalCardNovaLojaInput').value : document.getElementById('modalCardLoja').value;
         const status = document.getElementById('modalCardStatus').value;
         const radioSelected = document.querySelector('input[name="modalTagExp"]:checked');
         const tag = radioSelected ? radioSelected.value : 'Retrofit';
