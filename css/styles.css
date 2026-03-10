@@ -1060,9 +1060,9 @@ textarea:focus {
 .kanban-board {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: 1fr 1fr;
-    gap: 10px;
-    height: calc(100vh - 160px);
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 12px;
+    height: calc(100vh - 180px);
     padding: 10px 5px;
     width: 100%;
     overflow: hidden;
@@ -1107,11 +1107,12 @@ textarea:focus {
 
 .kanban-cards {
     flex: 1;
-    padding: 15px;
+    padding: 8px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 8px;
+    min-height: 0;
 }
 
 .kanban-card-item {
